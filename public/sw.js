@@ -1,11 +1,11 @@
 const CACHE_NAME = 'brewtimer-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/logo.png',
+  '/brewtimer/',
+  '/brewtimer/index.html',
+  '/brewtimer/manifest.json',
+  '/brewtimer/icon-192.png',
+  '/brewtimer/icon-512.png',
+  '/brewtimer/logo.png',
 ];
 
 self.addEventListener('install', (event) => {
