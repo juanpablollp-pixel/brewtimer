@@ -21,7 +21,7 @@ export default function RecipeList({ recipes, onNewRecipe, onEditRecipe, onDelet
     <div className="recipe-list">
       {/* Header con logo */}
       <div className="list-logo-header">
-        <img src="/brewtimer/logo-titulo.png" alt="BrewTimer" className="logo" />
+        <img src="https://juanpablollp-pixel.github.io/brewtimer/logo-titulo.png" alt="BrewTimer" className="logo" />
       </div>
 
       {/* Acciones principales */}
