@@ -129,10 +129,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   border-left: 2px solid #111;
   padding-left: 14px;
 }
-.logo {
-  height: 36px;
-  width: auto;
-  display: block;
+.logo-text {
+  font-family: "new-astro", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 32px;
+  color: #111;
 }
 
 .action-row {

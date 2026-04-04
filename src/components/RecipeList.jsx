@@ -21,12 +21,7 @@ export default function RecipeList({ recipes, onNewRecipe, onEditRecipe, onDelet
     <div className="recipe-list">
       {/* Header con logo */}
       <div className="list-logo-header">
-        <img
-          src={`${import.meta.env.BASE_URL}logo-titulo.png`}
-          alt="BrewTimer"
-          className="logo"
-          onError={(e) => console.log('Error cargando logo:', e.target.src)}
-        />
+        <span className="logo-text">BrewTimer</span>
       </div>
 
       {/* Acciones principales */}
