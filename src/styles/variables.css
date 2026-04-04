@@ -1,0 +1,16 @@
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f8f8f8;
+  --border: #e8e8e8;
+  --border-radius: 4px;
+  --text-primary: #111111;
+  --text-secondary: #bbbbbb;
+  --accent-green: #4a7c59;
+  --accent-orange: #c47a3a;
+  --accent-red: #e05555;
+  --accent-blue: #5a9fc2;
+  --font-primary: 'Exo 2', sans-serif;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+}
