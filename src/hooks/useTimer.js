@@ -114,6 +114,12 @@ export function useTimer(steps) {
     runInterval();
   }, [runInterval]);
 
+  const finish = useCallback(() => {
+    stopIv();
+    if (cdIv.current) { clearInterval(cdIv.current); cdIv.current = null; }
+    setPhase('finished');
+  }, []);
+
   const reset = useCallback(() => {
     stopIv();
     if (cdIv.current) { clearInterval(cdIv.current); cdIv.current = null; }
@@ -135,5 +141,5 @@ export function useTimer(steps) {
   const remaining = Math.max(0, stepDuration - elapsed);
   const progress = stepDuration > 0 ? Math.min(elapsed / stepDuration, 1) : 0;
 
-  return { phase, countdown, stepIdx, elapsed, remaining, progress, currentStep, start, pause, resume, skip, reset };
+  return { phase, countdown, stepIdx, elapsed, remaining, progress, currentStep, start, pause, resume, skip, finish, reset };
 }

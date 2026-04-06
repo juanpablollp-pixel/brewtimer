@@ -21,7 +21,7 @@ const BackArrow = () => (
 );
 
 export default function Timer({ recipe, onExit }) {
-  const { phase, countdown, stepIdx, remaining, progress, currentStep, start, pause, resume, skip, reset } =
+  const { phase, countdown, stepIdx, remaining, progress, currentStep, start, pause, resume, skip, finish, reset } =
     useTimer(recipe.steps);
   const { acquire, release } = useWakeLock();
 
@@ -48,9 +48,11 @@ export default function Timer({ recipe, onExit }) {
 
   const stepColor = currentStep?.type === 'espera' ? 'var(--accent-orange)' : 'var(--accent-green)';
   const ringProgress = isFinished ? 1 : progress;
-  const nextStep = recipe.steps[stepIdx + 1] ?? null;
   const activeStepData = isActive ? stepsWithAccumulated[stepIdx] : null;
   const firstStep = stepsWithAccumulated[0] ?? null;
+
+  // Paso actual para la card (countdown muestra el primero, active muestra el stepIdx)
+  const currentStepDisplay = isActive ? stepsWithAccumulated[stepIdx] : firstStep;
 
   const handleExit = () => { reset(); release(); onExit(); };
 
@@ -69,7 +71,7 @@ export default function Timer({ recipe, onExit }) {
         </span>
       </div>
 
-      {/* SVG Ring — fluye de arriba hacia abajo */}
+      {/* SVG Ring */}
       <div className="timer-ring-container">
         <svg viewBox="0 0 280 260" className="timer-ring">
           {/* Track */}
@@ -89,7 +91,7 @@ export default function Timer({ recipe, onExit }) {
             />
           )}
 
-          {/* Countdown (3, 2, 1 antes de iniciar) */}
+          {/* Countdown */}
           {isCountdown && (
             <text x={CX} y={CY + 18} textAnchor="middle"
               fontSize="72" fontWeight="700" fill="#111"
@@ -171,34 +173,6 @@ export default function Timer({ recipe, onExit }) {
         </svg>
       </div>
 
-      {/* Siguiente paso */}
-      {!isFinished && nextStep && (
-        <div className="next-step">
-          <div>
-            <p className="next-label">Siguiente paso</p>
-            <p className="next-name">
-              {nextStep.name}
-              {nextStep.targetWater > 0 && ` · ${nextStep.targetWater}ml`}
-              {` · ${nextStep.duration}s`}
-            </p>
-          </div>
-          <span className={`next-badge next-badge-${nextStep.type}`}>
-            {nextStep.type === 'vertido' ? 'Vertido' : 'Espera'}
-          </span>
-        </div>
-      )}
-
-      {isFinished && (
-        <div className="timer-finished-card">
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--accent-green)', marginBottom: '4px' }}>
-            Preparación completada
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '1px' }}>
-            {recipe.method ? `Disfruta tu ${recipe.method}` : 'Buen provecho'}
-          </div>
-        </div>
-      )}
-
       {/* Botones */}
       <div className="timer-buttons">
         {isIdle && (
@@ -210,12 +184,14 @@ export default function Timer({ recipe, onExit }) {
         {isRunning && (
           <>
             <button className="btn-secondary flex-1" onClick={pause}>Pausar</button>
+            <button className="btn-finish" onClick={finish}>Finalizar</button>
             <button className="btn-secondary" onClick={skip}>Saltar</button>
           </>
         )}
         {isPaused && (
           <>
             <button className="btn-green flex-1" onClick={resume}>Reanudar</button>
+            <button className="btn-finish" onClick={finish}>Finalizar</button>
             <button className="btn-secondary" onClick={skip}>Saltar</button>
           </>
         )}
@@ -223,6 +199,64 @@ export default function Timer({ recipe, onExit }) {
           <button className="btn-primary flex-1" onClick={handleExit}>Cerrar</button>
         )}
       </div>
+
+      {/* Card paso actual */}
+      {(isCountdown || isActive) && currentStepDisplay && (
+        <div className="next-step" style={{ marginTop: '16px' }}>
+          <div>
+            <p className="next-label">Paso actual</p>
+            <p className="next-name">
+              {currentStepDisplay.name}
+              {currentStepDisplay.type === 'vertido' && currentStepDisplay.targetWater > 0 && ` · ${currentStepDisplay.targetWater}ml`}
+              {` · ${currentStepDisplay.duration}s`}
+            </p>
+          </div>
+          <span className={`next-badge next-badge-${currentStepDisplay.type}`}>
+            {currentStepDisplay.type === 'vertido' ? 'Vertido' : 'Espera'}
+          </span>
+        </div>
+      )}
+
+      {/* Pantalla de fin */}
+      {isFinished && (
+        <div className="timer-finished-card">
+          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--accent-green)', marginBottom: '4px' }}>
+            Preparación completada
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '1px' }}>
+            {recipe.method ? `Disfruta tu ${recipe.method}` : 'Buen provecho'}
+          </div>
+        </div>
+      )}
+
+      {/* Lista de todas las fases */}
+      {!isIdle && (
+        <div className="phases-list">
+          {stepsWithAccumulated.map((step, idx) => {
+            const isDone = isFinished || idx < stepIdx;
+            const isCurrent = !isFinished && (isActive || isCountdown) && idx === stepIdx;
+            return (
+              <div
+                key={idx}
+                className={[
+                  'phase-row',
+                  isDone ? 'phase-row-done' : '',
+                  isCurrent ? `phase-row-current-${step.type}` : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <span className="phase-row-name">{step.name}</span>
+                <span className="phase-row-meta">
+                  {step.type === 'vertido' && step.targetWater > 0 ? `${step.targetWater}ml · ` : ''}
+                  {step.duration}s
+                </span>
+                <span className={`next-badge next-badge-${step.type}`}>
+                  {step.type === 'vertido' ? 'Vertido' : 'Espera'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

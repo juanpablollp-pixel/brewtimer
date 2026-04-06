@@ -703,3 +703,54 @@ input[type='range'].slider::-moz-range-thumb {
   gap: 8px;
   margin-top: 4px;
 }
+
+.btn-finish {
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid #fce8e8;
+  background: #fff;
+  color: #e05555;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.phases-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.phase-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+  border-left-width: 1px;
+}
+.phase-row-done {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.phase-row-current-vertido {
+  border-left: 2px solid #4a7c59;
+}
+.phase-row-current-espera {
+  border-left: 2px solid #c47a3a;
+}
+.phase-row-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+.phase-row-meta {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
