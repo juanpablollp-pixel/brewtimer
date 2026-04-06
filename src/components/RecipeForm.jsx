@@ -67,7 +67,7 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
       ...prev,
       steps: prev.steps.map((s, i) =>
         i === idx
-          ? { ...s, [field]: field === 'name' ? value : Number(value) }
+          ? { ...s, [field]: value }
           : s
       ),
     }));
@@ -198,13 +198,13 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
                 <input
                   className="step-input"
                   type="number"
-                  value={step.targetWater}
+                  defaultValue={step.targetWater}
                   onFocus={(e) => e.target.select()}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/^0+/, '') || '';
-                    updateStep(idx, 'targetWater', val === '' ? 0 : Number(val));
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    e.target.value = String(val);
+                    updateStep(idx, 'targetWater', val);
                   }}
-                  onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'targetWater', 0); }}
                   min="0"
                   title="Agua (ml)"
                 />
@@ -214,13 +214,13 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
             <input
               className="step-input"
               type="number"
-              value={step.duration}
+              defaultValue={step.duration}
               onFocus={(e) => e.target.select()}
-              onChange={(e) => {
-                const val = e.target.value.replace(/^0+/, '') || '';
-                updateStep(idx, 'duration', val === '' ? 0 : Number(val));
+              onBlur={(e) => {
+                const val = parseInt(e.target.value) || 0;
+                e.target.value = String(val);
+                updateStep(idx, 'duration', val);
               }}
-              onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'duration', 0); }}
               min="0"
               title="Duración (s)"
             />
