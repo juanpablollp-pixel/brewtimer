@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conociendo mi Café — BrewTimer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/afq6ikf.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --negro: #111111;
+    --gris: #bbbbbb;
+    --gris-borde: #e8e8e8;
+    --verde: #4a7c59;
+    --naranja: #c47a3a;
+    --rojo: #e05555;
+    --celeste: #5a9fc2;
+    --fondo: #ffffff;
+    --radius: 4px;
+  }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--fondo);
+    color: var(--negro);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0 0 40px 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 36px 24px 24px;
+    text-align: center;
+  }
+
+  .titulo-new-astro {
+    font-family: "new-astro", sans-serif;
+    font-size: 32px;
+    color: var(--negro);
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  /* ── BOTONES PRINCIPALES ── */
+  .botones-principales {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 24px 24px;
+  }
+
+  .btn-recurso {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px 10px;
+    cursor: pointer;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .btn-scaa {
+    background: var(--naranja);
+    color: #fff;
+  }
+
+  .btn-wcr {
+    background: var(--verde);
+    color: #fff;
+  }
+
+  /* ── HISTORIAL ── */
+  .historial-section {
+    padding: 0 24px;
+  }
+
+  .historial-label {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gris);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gris-borde);
+    margin-bottom: 16px;
+  }
+
+  /* ── CARD PREPARACIÓN ── */
+  .prep-card {
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .card-titulo-grupo {
+    flex: 1;
+  }
+
+  .card-nombre {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--negro);
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+
+  .card-metodo {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gris);
+  }
+
+  .card-fecha-grupo {
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  .card-fecha {
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: var(--negro);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* tiempo extra / faltante */
+  .tiempo-extra {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--rojo);
+    text-align: right;
+    display: block;
+  }
+
+  .tiempo-faltante {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--verde);
+    text-align: right;
+    display: block;
+  }
+
+  /* sin dato de tiempo */
+  .tiempo-neutro {
+    font-size: 10px;
+    font-weight: 300;
+    color: var(--gris);
+    text-align: right;
+    display: block;
+    font-style: italic;
+  }
+
+  /* ── SEPARADOR ── */
+  .card-divider {
+    height: 1px;
+    background: var(--gris-borde);
+    margin-bottom: 12px;
+  }
+
+  /* ── STATS TABLE ── */
+  .stats-tabla {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--gris-borde);
+    border-bottom: 1px solid var(--gris-borde);
+    margin-bottom: 12px;
+  }
+
+  .stat-col {
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  .stat-col + .stat-col {
+    border-left: 1px solid var(--gris-borde);
+  }
+
+  .stat-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gris);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .stat-valor {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--negro);
+    line-height: 1;
+  }
+
+  /* ── BOTONES CARD ── */
+  .card-acciones {
+    display: grid;
+    grid-template-columns: 1fr 44px;
+    gap: 8px;
+  }
+
+  .btn-detalle {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: var(--celeste);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .btn-eliminar {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    background: transparent;
+    color: var(--rojo);
+    border: 1px solid var(--rojo);
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── ESTADO VACÍO ── */
+  .historial-vacio {
+    text-align: center;
+    padding: 48px 0 24px;
+  }
+
+  .historial-vacio p {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--gris);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="titulo-new-astro">Conociendo mi Café</div>
+</div>
+
+<!-- BOTONES PRINCIPALES -->
+<div class="botones-principales">
+  <button class="btn-recurso btn-scaa">SCAA Taster<br>Flavor Wheel</button>
+  <button class="btn-recurso btn-wcr">WCR Sensory<br>Lexicon</button>
+</div>
+
+<!-- HISTORIAL -->
+<div class="historial-section">
+  <div class="historial-label">Historial de Preparaciones</div>
+
+  <!-- CARD 1 — con tiempo extra (rojo) -->
+  <div class="prep-card">
+    <div class="card-header">
+      <div class="card-titulo-grupo">
+        <div class="card-nombre">AeroPress Bunker Kenia/HB</div>
+        <div class="card-metodo">AeroPress</div>
+      </div>
+      <div class="card-fecha-grupo">
+        <span class="card-fecha">04 / 04 / 2026</span>
+        <span class="tiempo-extra">+15s Extra</span>
+      </div>
+    </div>
+
+    <div class="stats-tabla">
+      <div class="stat-col">
+        <span class="stat-label">Café</span>
+        <span class="stat-valor">18g</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Agua</span>
+        <span class="stat-valor">240ml</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Temp.</span>
+        <span class="stat-valor">92°c</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Ratio</span>
+        <span class="stat-valor">1:13</span>
+      </div>
+    </div>
+
+    <div class="card-acciones">
+      <button class="btn-detalle">Detalle de la preparación</button>
+      <button class="btn-eliminar">✕</button>
+    </div>
+  </div>
+
+  <!-- CARD 2 — con tiempo faltante (verde) -->
+  <div class="prep-card">
+    <div class="card-header">
+      <div class="card-titulo-grupo">
+        <div class="card-nombre">V60 Etiopía Yirgacheffe</div>
+        <div class="card-metodo">V60</div>
+      </div>
+      <div class="card-fecha-grupo">
+        <span class="card-fecha">03 / 04 / 2026</span>
+        <span class="tiempo-faltante">−22s Faltantes</span>
+      </div>
+    </div>
+
+    <div class="stats-tabla">
+      <div class="stat-col">
+        <span class="stat-label">Café</span>
+        <span class="stat-valor">15g</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Agua</span>
+        <span class="stat-valor">250ml</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Temp.</span>
+        <span class="stat-valor">93°c</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Ratio</span>
+        <span class="stat-valor">1:16</span>
+      </div>
+    </div>
+
+    <div class="card-acciones">
+      <button class="btn-detalle">Detalle de la preparación</button>
+      <button class="btn-eliminar">✕</button>
+    </div>
+  </div>
+
+  <!-- CARD 3 — sin fase de tiempo final (sin dato) -->
+  <div class="prep-card">
+    <div class="card-header">
+      <div class="card-titulo-grupo">
+        <div class="card-nombre">French Press Colombia</div>
+        <div class="card-metodo">French Press</div>
+      </div>
+      <div class="card-fecha-grupo">
+        <span class="card-fecha">02 / 04 / 2026</span>
+        <span class="tiempo-neutro">sin fase final</span>
+      </div>
+    </div>
+
+    <div class="stats-tabla">
+      <div class="stat-col">
+        <span class="stat-label">Café</span>
+        <span class="stat-valor">20g</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Agua</span>
+        <span class="stat-valor">300ml</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Temp.</span>
+        <span class="stat-valor">95°c</span>
+      </div>
+      <div class="stat-col">
+        <span class="stat-label">Ratio</span>
+        <span class="stat-valor">1:15</span>
+      </div>
+    </div>
+
+    <div class="card-acciones">
+      <button class="btn-detalle">Detalle de la preparación</button>
+      <button class="btn-eliminar">✕</button>
+    </div>
+  </div>
+
+</div><!-- /historial-section -->
+
+</body>
+</html>

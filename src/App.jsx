@@ -4,9 +4,10 @@ import RecipeList from './components/RecipeList';
 import RecipeForm from './components/RecipeForm';
 import RatioCalculator from './components/RatioCalculator';
 import Timer from './components/Timer';
+import BrewKnowledge from './components/BrewKnowledge';
 
 export default function App() {
-  const [view, setView] = useState('list'); // list | form | ratio | timer
+  const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [timerRecipe, setTimerRecipe] = useState(null);
   const { recipes, saveRecipe, deleteRecipe } = useRecipes();
@@ -21,6 +22,7 @@ export default function App() {
   const goToTimer = (recipe) => { setTimerRecipe(recipe); setView('timer'); };
   const goToList = () => setView('list');
   const goToRatio = () => setView('ratio');
+  const goToKnowledge = () => setView('knowledge');
 
   return (
     <div className="app">
@@ -32,6 +34,7 @@ export default function App() {
           onDeleteRecipe={deleteRecipe}
           onStartTimer={goToTimer}
           onRatioCalc={goToRatio}
+          onKnowledge={goToKnowledge}
         />
       )}
       {view === 'form' && (
@@ -46,6 +49,9 @@ export default function App() {
       )}
       {view === 'timer' && timerRecipe && (
         <Timer recipe={timerRecipe} onExit={goToList} />
+      )}
+      {view === 'knowledge' && (
+        <BrewKnowledge onBack={goToList} />
       )}
     </div>
   );

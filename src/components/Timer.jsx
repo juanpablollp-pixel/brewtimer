@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTimer } from '../hooks/useTimer';
 import { useWakeLock } from '../hooks/useWakeLock';
+import { saveBrewToHistory } from '../hooks/useHistory';
 
 const RADIUS = 110;
 const CX = 140;
@@ -21,12 +22,14 @@ const BackArrow = () => (
 );
 
 export default function Timer({ recipe, onExit }) {
-  const { phase, countdown, stepIdx, remaining, progress, currentStep, start, pause, resume, skip, finish, reset } =
-    useTimer(recipe.steps);
+  const {
+    phase, countdown, stepIdx, remaining, progress, currentStep,
+    extraSeconds, start, pause, resume, skip, finish, reset,
+  } = useTimer(recipe.steps);
   const { acquire, release } = useWakeLock();
 
   useEffect(() => {
-    if (phase === 'running') acquire();
+    if (phase === 'running' || phase === 'overtime') acquire();
     else release();
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -36,8 +39,15 @@ export default function Timer({ recipe, onExit }) {
   const isCountdown = phase === 'countdown';
   const isRunning = phase === 'running';
   const isPaused = phase === 'paused';
+  const isOvertime = phase === 'overtime';
   const isFinished = phase === 'finished';
   const isActive = isRunning || isPaused;
+
+  // Calls finish(), saves to history, then returns (doesn't navigate away)
+  const handleFinish = () => {
+    const delta = finish();
+    saveBrewToHistory(recipe, delta);
+  };
 
   // Pre-calcular gramos acumulados por paso
   let acc = 0;
@@ -47,7 +57,7 @@ export default function Timer({ recipe, onExit }) {
   });
 
   const stepColor = currentStep?.type === 'espera' ? 'var(--accent-orange)' : 'var(--accent-green)';
-  const ringProgress = isFinished ? 1 : progress;
+  const ringProgress = (isFinished || isOvertime) ? 1 : progress;
   const activeStepData = isActive ? stepsWithAccumulated[stepIdx] : null;
   const firstStep = stepsWithAccumulated[0] ?? null;
 
@@ -78,11 +88,11 @@ export default function Timer({ recipe, onExit }) {
           <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="#f0f0f0" strokeWidth="1" />
 
           {/* Progress arc */}
-          {(isActive || isFinished) && (
+          {(isActive || isFinished || isOvertime) && (
             <circle
               cx={CX} cy={CY} r={RADIUS}
               fill="none"
-              stroke={isFinished ? 'var(--accent-green)' : stepColor}
+              stroke={(isFinished || isOvertime) ? 'var(--accent-green)' : stepColor}
               strokeWidth="1.5"
               strokeDasharray={CIRC}
               strokeDashoffset={CIRC * (1 - ringProgress)}
@@ -101,7 +111,7 @@ export default function Timer({ recipe, onExit }) {
           )}
 
           {/* Finished */}
-          {isFinished && (
+          {(isFinished || isOvertime) && (
             <text x={CX} y={CY + 10} textAnchor="middle"
               fontSize="22" fontWeight="700" fill="var(--accent-green)"
               fontFamily="'Exo 2', sans-serif" letterSpacing="2">
@@ -171,6 +181,13 @@ export default function Timer({ recipe, onExit }) {
             )
           )}
         </svg>
+
+        {/* Overtime counter — shown below the ring while overtime is active */}
+        {isOvertime && (
+          <div className="timer-overtime-counter">
+            +{extraSeconds}s Extra
+          </div>
+        )}
       </div>
 
       {/* Botones */}
@@ -184,16 +201,19 @@ export default function Timer({ recipe, onExit }) {
         {isRunning && (
           <>
             <button className="btn-secondary flex-1" onClick={pause}>Pausar</button>
-            <button className="btn-finish" onClick={finish}>Finalizar</button>
+            <button className="btn-finish" onClick={handleFinish}>Finalizar</button>
             <button className="btn-secondary" onClick={skip}>Saltar</button>
           </>
         )}
         {isPaused && (
           <>
             <button className="btn-green flex-1" onClick={resume}>Reanudar</button>
-            <button className="btn-finish" onClick={finish}>Finalizar</button>
+            <button className="btn-finish" onClick={handleFinish}>Finalizar</button>
             <button className="btn-secondary" onClick={skip}>Saltar</button>
           </>
+        )}
+        {isOvertime && (
+          <button className="btn-finish flex-1" onClick={handleFinish}>Finalizar</button>
         )}
         {isFinished && (
           <button className="btn-primary flex-1" onClick={handleExit}>Cerrar</button>
@@ -233,8 +253,8 @@ export default function Timer({ recipe, onExit }) {
       {!isIdle && (
         <div className="phases-list">
           {stepsWithAccumulated.map((step, idx) => {
-            const isDone = isFinished || idx < stepIdx;
-            const isCurrent = !isFinished && (isActive || isCountdown) && idx === stepIdx;
+            const isDone = isFinished || isOvertime || idx < stepIdx;
+            const isCurrent = !isFinished && !isOvertime && (isActive || isCountdown) && idx === stepIdx;
             return (
               <div
                 key={idx}

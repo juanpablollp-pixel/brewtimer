@@ -16,7 +16,7 @@ function fmtRatio(ratio) {
   return ratio;
 }
 
-export default function RecipeList({ recipes, onNewRecipe, onEditRecipe, onDeleteRecipe, onStartTimer, onRatioCalc }) {
+export default function RecipeList({ recipes, onNewRecipe, onEditRecipe, onDeleteRecipe, onStartTimer, onRatioCalc, onKnowledge }) {
   return (
     <div className="recipe-list">
       {/* Header con logo */}
@@ -31,6 +31,11 @@ export default function RecipeList({ recipes, onNewRecipe, onEditRecipe, onDelet
         </button>
         <button className="action-btn" onClick={onRatioCalc}>
           ⊙ Calcular ratio
+        </button>
+      </div>
+      <div className="action-row" style={{ marginTop: '-14px' }}>
+        <button className="action-btn" onClick={onKnowledge}>
+          ☕ Conociendo mi Café
         </button>
       </div>
 
