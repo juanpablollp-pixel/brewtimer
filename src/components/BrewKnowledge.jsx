@@ -29,41 +29,34 @@ function TimeDeltaBadge({ timeDelta }) {
 
 function BrewCard({ entry, onDelete }) {
   return (
-    <div className="bk-prep-card">
-      <div className="bk-card-header">
-        <div className="bk-card-titulo-grupo">
-          <div className="bk-card-nombre">{entry.recipeName}</div>
-          <div className="bk-card-metodo">{entry.method || '—'}</div>
+    <div className="recipe-card">
+      {/* Same structure as RecipeList card-top, but right side is date + timedelta instead of color-dot */}
+      <div className="card-top">
+        <div>
+          <div className="recipe-name">{entry.recipeName}</div>
+          <div className="recipe-method">{entry.method || '—'}</div>
         </div>
-        <div className="bk-card-fecha-grupo">
+        <div className="bk-fecha-grupo">
           <span className="bk-card-fecha">{formatDate(entry.date)}</span>
           <TimeDeltaBadge timeDelta={entry.timeDelta} />
         </div>
       </div>
 
-      <div className="bk-stats-tabla">
-        <div className="bk-stat-col">
-          <span className="bk-stat-label">Café</span>
-          <span className="bk-stat-valor">{entry.coffee}g</span>
-        </div>
-        <div className="bk-stat-col">
-          <span className="bk-stat-label">Agua</span>
-          <span className="bk-stat-valor">{entry.water}ml</span>
-        </div>
-        <div className="bk-stat-col">
-          <span className="bk-stat-label">Temp.</span>
-          <span className="bk-stat-valor">{entry.temperature}°c</span>
-        </div>
-        <div className="bk-stat-col">
-          <span className="bk-stat-label">Ratio</span>
-          <span className="bk-stat-valor">{entry.ratio || '—'}</span>
-        </div>
+      {/* Exact same stats-row / stat structure as RecipeList */}
+      <div className="stats-row">
+        <div className="stat"><span>Café</span>{entry.coffee}g</div>
+        <div className="stat"><span>Agua</span>{entry.water}ml</div>
+        <div className="stat"><span>Temp</span>{entry.temperature}°C</div>
+        <div className="stat"><span>Ratio</span>{entry.ratio || '—'}</div>
       </div>
 
-      <div className="bk-card-acciones">
-        <button className="bk-btn-detalle">Detalle de la preparación</button>
+      {/* Same card-actions dimensions; btn-preparar overridden to celeste via bk-btn-detalle */}
+      <div className="card-actions">
+        <button className="btn-preparar bk-btn-detalle">
+          Detalle de la preparación
+        </button>
         <button
-          className="bk-btn-eliminar"
+          className="btn-icon btn-icon-danger"
           onClick={() => onDelete(entry.id)}
           aria-label="Eliminar preparación"
         >
@@ -92,14 +85,10 @@ export default function BrewKnowledge({ onBack }) {
         <div className="bk-titulo">Conociendo mi Café</div>
       </div>
 
-      {/* Botones principales */}
-      <div className="bk-botones-principales">
-        <button className="bk-btn-recurso bk-btn-scaa">
-          SCAA Taster<br />Flavor Wheel
-        </button>
-        <button className="bk-btn-recurso bk-btn-wcr">
-          WCR Sensory<br />Lexicon
-        </button>
+      {/* Botones — misma clase action-btn, solo se sobreescribe color */}
+      <div className="action-row">
+        <button className="action-btn bk-btn-scaa">SCAA Flavor Wheel</button>
+        <button className="action-btn bk-btn-wcr">WCR Sensory Lexicon</button>
       </div>
 
       {/* Historial */}
