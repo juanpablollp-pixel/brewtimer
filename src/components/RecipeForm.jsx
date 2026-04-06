@@ -198,13 +198,13 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
                 <input
                   className="step-input"
                   type="number"
-                  defaultValue={step.targetWater}
+                  value={step.targetWater}
                   onFocus={(e) => e.target.select()}
-                  onBlur={(e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    updateStep(idx, 'targetWater', val);
-                    e.target.value = val;
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/^0+/, '') || '';
+                    updateStep(idx, 'targetWater', val === '' ? 0 : Number(val));
                   }}
+                  onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'targetWater', 0); }}
                   min="0"
                   title="Agua (ml)"
                 />
@@ -214,13 +214,13 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
             <input
               className="step-input"
               type="number"
-              defaultValue={step.duration}
+              value={step.duration}
               onFocus={(e) => e.target.select()}
-              onBlur={(e) => {
-                const val = parseInt(e.target.value) || 0;
-                updateStep(idx, 'duration', val);
-                e.target.value = val;
+              onChange={(e) => {
+                const val = e.target.value.replace(/^0+/, '') || '';
+                updateStep(idx, 'duration', val === '' ? 0 : Number(val));
               }}
+              onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'duration', 0); }}
               min="0"
               title="Duración (s)"
             />
