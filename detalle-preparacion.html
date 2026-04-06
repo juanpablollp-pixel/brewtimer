@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalle de Preparación — BrewTimer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/afq6ikf.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --negro: #111111;
+    --gris: #bbbbbb;
+    --gris-borde: #e8e8e8;
+    --verde: #4a7c59;
+    --naranja: #c47a3a;
+    --rojo: #e05555;
+    --celeste: #5a9fc2;
+    --fondo: #ffffff;
+    --radius: 4px;
+  }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── MODAL OVERLAY SIMULATION ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.18);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .modal-sheet {
+    background: var(--fondo);
+    width: 100%;
+    max-width: 430px;
+    max-height: 92vh;
+    border-radius: 12px 12px 0 0;
+    overflow-y: auto;
+    padding: 0 0 40px 0;
+  }
+
+  /* ── HANDLE ── */
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--gris-borde);
+    border-radius: 2px;
+    margin: 14px auto 0;
+  }
+
+  /* ── HEADER ── */
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .modal-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--negro);
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+
+  .modal-subtitulo {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gris);
+  }
+
+  .modal-fecha {
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: var(--negro);
+    margin-top: 6px;
+  }
+
+  /* ── SECCIÓN GENÉRICA ── */
+  .seccion {
+    padding: 18px 24px 0;
+  }
+
+  .seccion-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gris);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gris-borde);
+    margin-bottom: 14px;
+  }
+
+  /* ── DETALLES RECETA ── */
+  .detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .detalle-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .detalle-item-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gris);
+  }
+
+  .detalle-item-valor {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--negro);
+  }
+
+  /* ── TIEMPO OBJETIVO vs REAL ── */
+  .tiempo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid var(--gris-borde);
+    border-bottom: 1px solid var(--gris-borde);
+    margin-bottom: 0;
+  }
+
+  .tiempo-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tiempo-bloque-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gris);
+  }
+
+  .tiempo-bloque-valor {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--negro);
+  }
+
+  .tiempo-bloque-valor.extra {
+    color: var(--rojo);
+  }
+
+  .tiempo-bloque-valor.faltante {
+    color: var(--verde);
+  }
+
+  /* ── RECOMENDACIÓN MOLIENDA ── */
+  .recomendacion-molienda {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .recomendacion-molienda.fino {
+    border-color: var(--celeste);
+    background: #f0f7fc;
+  }
+
+  .recomendacion-molienda.grueso {
+    border-color: var(--naranja);
+    background: #fdf6f0;
+  }
+
+  .rec-icono {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .rec-texto {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--negro);
+    line-height: 1.4;
+  }
+
+  .rec-texto span {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--gris);
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── ANÁLISIS SENSORIAL ── */
+  .tueste-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .tueste-btn {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 6px;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--gris);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .tueste-btn.activo {
+    border-color: var(--naranja);
+    color: var(--naranja);
+    background: #fdf6f0;
+  }
+
+  .tueste-sub {
+    font-size: 8px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: inherit;
+    display: block;
+    margin-top: 2px;
+    opacity: 0.8;
+  }
+
+  /* ── ATRIBUTO SENSORIAL ── */
+  .atributo-row {
+    margin-bottom: 16px;
+  }
+
+  .atributo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .atributo-nombre {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--negro);
+  }
+
+  .atributo-desc {
+    font-size: 9px;
+    font-weight: 300;
+    color: var(--gris);
+    letter-spacing: 0.04em;
+  }
+
+  /* círculos 1-5 */
+  .circulos {
+    display: flex;
+    gap: 8px;
+  }
+
+  .circulo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--gris-borde);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gris);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* colores activos por atributo */
+  .acidez .circulo.activo   { background: var(--celeste); border-color: var(--celeste); color: #fff; }
+  .amargor .circulo.activo  { background: var(--naranja); border-color: var(--naranja); color: #fff; }
+  .astringencia .circulo.activo { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+
+  /* ── RECOMENDACIÓN TEMPERATURA ── */
+  .recomendacion-temp {
+    margin: 4px 0 0;
+    padding: 14px;
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radius);
+    background: #fafafa;
+  }
+
+  .rec-temp-header {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 8px;
+  }
+
+  .rec-temp-cuerpo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .temp-actual {
+    text-align: center;
+  }
+
+  .temp-actual-valor {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--negro);
+    line-height: 1;
+  }
+
+  .temp-actual-label {
+    font-size: 8px;
+    font-weight: 400;
+    color: var(--gris);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .temp-flecha {
+    font-size: 18px;
+    color: var(--gris-borde);
+    flex-shrink: 0;
+  }
+
+  .temp-sugerida {
+    text-align: center;
+  }
+
+  .temp-sugerida-valor {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--celeste);
+    line-height: 1;
+  }
+
+  .temp-sugerida-label {
+    font-size: 8px;
+    font-weight: 400;
+    color: var(--gris);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .rec-temp-mensaje {
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--negro);
+    line-height: 1.5;
+    padding-top: 10px;
+    border-top: 1px solid var(--gris-borde);
+  }
+
+  .rec-temp-mensaje strong {
+    font-weight: 700;
+  }
+
+  .rec-temp-comentario {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--naranja);
+    line-height: 1.5;
+    padding-top: 8px;
+    border-top: 1px solid #f5e6d4;
+  }
+
+  .rec-temp-comentario strong {
+    font-weight: 700;
+  }
+
+  /* incompatibilidad */
+  .recomendacion-incompatible {
+    margin: 4px 0 0;
+    padding: 14px;
+    border: 1px solid #ffd0d0;
+    border-radius: var(--radius);
+    background: #fff8f8;
+  }
+
+  .incompat-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--rojo);
+    margin-bottom: 6px;
+  }
+
+  .incompat-msg {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--negro);
+    line-height: 1.5;
+  }
+
+  /* ── BOTÓN GUARDAR ── */
+  .btn-guardar-analisis {
+    display: block;
+    width: calc(100% - 48px);
+    margin: 20px 24px 0;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: var(--verde);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px;
+    cursor: pointer;
+  }
+
+  /* ── DEMO SWITCHER (solo para mockup) ── */
+  .demo-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #222;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    z-index: 200;
+  }
+  .demo-btn {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .demo-btn.on { background: var(--celeste); }
+</style>
+</head>
+<body>
+
+<!-- MODAL BOTTOM SHEET -->
+<div class="modal-overlay">
+  <div class="modal-sheet" id="sheet">
+
+    <div class="modal-handle"></div>
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="modal-titulo">AeroPress Bunker Kenia/HB</div>
+      <div class="modal-subtitulo">AeroPress</div>
+      <div class="modal-fecha">06 / 04 / 2026 — 09:34</div>
+    </div>
+
+    <!-- SECCIÓN: DETALLES DE LA RECETA -->
+    <div class="seccion">
+      <div class="seccion-label">Detalles de la Receta</div>
+
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <span class="detalle-item-label">Café</span>
+          <span class="detalle-item-valor">18g</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-item-label">Agua</span>
+          <span class="detalle-item-valor">240ml</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-item-label">Temperatura</span>
+          <span class="detalle-item-valor">92°c</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-item-label">Ratio</span>
+          <span class="detalle-item-valor">1:13</span>
+        </div>
+      </div>
+
+      <!-- TIEMPO OBJETIVO vs DELTA -->
+      <div class="tiempo-row">
+        <div class="tiempo-bloque">
+          <span class="tiempo-bloque-label">Tiempo Objetivo</span>
+          <span class="tiempo-bloque-valor">3:30</span>
+        </div>
+        <div class="tiempo-bloque" id="tiempo-delta-bloque">
+          <!-- cambia según estado -->
+          <span class="tiempo-bloque-label">Tiempo Extra</span>
+          <span class="tiempo-bloque-valor extra" id="delta-valor">+15s Extra</span>
+        </div>
+      </div>
+
+      <!-- RECOMENDACIÓN MOLIENDA -->
+      <div class="recomendacion-molienda grueso" id="rec-molienda">
+        <span class="rec-icono">⚙️</span>
+        <div class="rec-texto">
+          Moler más Grueso
+          <span>La extracción superó el tiempo objetivo</span>
+        </div>
+      </div>
+
+    </div><!-- /seccion detalles -->
+
+    <!-- SECCIÓN: ANÁLISIS SENSORIAL -->
+    <div class="seccion" style="padding-top:22px;">
+      <div class="seccion-label">Análisis Sensorial</div>
+
+      <!-- SELECTOR TUESTE -->
+      <div class="tueste-selector">
+        <button class="tueste-btn">
+          Claro
+          <span class="tueste-sub">92–95°c</span>
+        </button>
+        <button class="tueste-btn activo">
+          Medio
+          <span class="tueste-sub">88–92°c</span>
+        </button>
+        <button class="tueste-btn">
+          Oscuro
+          <span class="tueste-sub">85–88°c</span>
+        </button>
+      </div>
+
+      <!-- ACIDEZ -->
+      <div class="atributo-row acidez">
+        <div class="atributo-header">
+          <span class="atributo-nombre">Acidez</span>
+          <span class="atributo-desc">Sub-extracción</span>
+        </div>
+        <div class="circulos">
+          <button class="circulo">1</button>
+          <button class="circulo">2</button>
+          <button class="circulo">3</button>
+          <button class="circulo activo">4</button>
+          <button class="circulo">5</button>
+        </div>
+      </div>
+
+      <!-- AMARGOR -->
+      <div class="atributo-row amargor">
+        <div class="atributo-header">
+          <span class="atributo-nombre">Amargor</span>
+          <span class="atributo-desc">Punto de balance</span>
+        </div>
+        <div class="circulos">
+          <button class="circulo">1</button>
+          <button class="circulo activo">2</button>
+          <button class="circulo">3</button>
+          <button class="circulo">4</button>
+          <button class="circulo">5</button>
+        </div>
+      </div>
+
+      <!-- ASTRINGENCIA -->
+      <div class="atributo-row astringencia">
+        <div class="atributo-header">
+          <span class="atributo-nombre">Astringencia</span>
+          <span class="atributo-desc">Sobre-extracción</span>
+        </div>
+        <div class="circulos">
+          <button class="circulo activo">1</button>
+          <button class="circulo">2</button>
+          <button class="circulo">3</button>
+          <button class="circulo">4</button>
+          <button class="circulo">5</button>
+        </div>
+      </div>
+
+      <!-- RECOMENDACIÓN TEMPERATURA — estado normal -->
+      <div class="recomendacion-temp" id="rec-temp-normal">
+        <div class="rec-temp-header">Recomendación de Temperatura</div>
+        <div class="rec-temp-cuerpo">
+          <div class="temp-actual">
+            <div class="temp-actual-valor" id="temp-actual-val">92°c</div>
+            <div class="temp-actual-label">Actual</div>
+          </div>
+          <div class="temp-flecha">→</div>
+          <div class="temp-sugerida">
+            <div class="temp-sugerida-valor" id="temp-sugerida-val">94°c</div>
+            <div class="temp-sugerida-label">Sugerida</div>
+          </div>
+        </div>
+        <div class="rec-temp-mensaje" id="rec-temp-msg">
+          La acidez alta indica <strong>sub-extracción</strong>. Subí la temperatura <strong>+2°c</strong> para aumentar la solubilidad y balancear el perfil dentro del rango de tueste medio.
+        </div>
+        <!-- comentario de límite — visible solo cuando la sugerencia toca/supera el borde del rango -->
+        <div class="rec-temp-comentario" id="rec-temp-comentario">
+          Teniendo en cuenta que tu temperatura es de <strong>92°c</strong>, quizá el tipo de tueste de tu café es <strong>más claro de lo que indica el tostador</strong>.
+        </div>
+      </div>
+
+      <!-- RECOMENDACIÓN TEMPERATURA — estado incompatible (oculto por defecto) -->
+      <div class="recomendacion-incompatible" id="rec-temp-incompat" style="display:none;">
+        <div class="incompat-label">⚠ Calificación Incompatible</div>
+        <div class="incompat-msg">
+          No es posible una recomendación dado que tus calificaciones entre <strong>Acidez y Astringencia</strong> son incompatibles. Una acidez alta y astringencia alta no pueden ocurrir simultáneamente.
+        </div>
+      </div>
+
+    </div><!-- /seccion sensorial -->
+
+    <!-- BOTÓN GUARDAR -->
+    <button class="btn-guardar-analisis">Guardar Análisis</button>
+
+  </div><!-- /modal-sheet -->
+</div><!-- /modal-overlay -->
+
+<!-- DEMO BAR — solo para el mockup, no va en React -->
+<div class="demo-bar">
+  <button class="demo-btn on" onclick="setEstado('extra')">+Extra</button>
+  <button class="demo-btn" onclick="setEstado('faltante')">−Faltante</button>
+  <button class="demo-btn" onclick="setEstado('nulo')">Sin fase final</button>
+  <button class="demo-btn" onclick="setEstado('incompat')">Incompatible</button>
+  <button class="demo-btn" onclick="setEstado('limite-techo')">Límite techo</button>
+  <button class="demo-btn" onclick="setEstado('limite-piso')">Límite piso</button>
+</div>
+
+<script>
+// Rangos de temperatura por tueste
+const RANGOS = {
+  claro:  { min: 92, max: 95 },
+  medio:  { min: 88, max: 92 },
+  oscuro: { min: 85, max: 88 }
+};
+
+function calcularTemp(tempActual, tueste, acidez, amargor, astringencia) {
+  const rango = RANGOS[tueste];
+  // señal: positivo = subir, negativo = bajar
+  const señal = (acidez - astringencia);
+  const magnitud = Math.abs(señal);
+  const ajuste = magnitud >= 3 ? 3 : magnitud >= 2 ? 2 : 1;
+  let sugerida = señal > 0
+    ? Math.min(tempActual + ajuste, rango.max)
+    : Math.max(tempActual - ajuste, rango.min);
+  return { sugerida, rango };
+}
+
+function setEstado(tipo) {
+  const deltaBloque = document.getElementById('tiempo-delta-bloque');
+  const deltaValor = document.getElementById('delta-valor');
+  const recMolienda = document.getElementById('rec-molienda');
+  const recTempNormal = document.getElementById('rec-temp-normal');
+  const recTempIncompat = document.getElementById('rec-temp-incompat');
+  const msgEl = document.getElementById('rec-temp-msg');
+  const comentarioEl = document.getElementById('rec-temp-comentario');
+  const tempActualEl = document.getElementById('temp-actual-val');
+  const tempSugeridaEl = document.getElementById('temp-sugerida-val');
+
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+
+  recTempNormal.style.display = 'none';
+  recTempIncompat.style.display = 'none';
+  comentarioEl.style.display = 'none';
+
+  if (tipo === 'extra') {
+    // Tueste medio, 92°c, acidez 4, amargor 2, astringencia 1 → techo del rango
+    deltaValor.textContent = '+15s Extra';
+    deltaValor.className = 'tiempo-bloque-valor extra';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Tiempo Extra';
+    recMolienda.className = 'recomendacion-molienda grueso';
+    recMolienda.querySelector('.rec-texto').innerHTML = 'Moler más Grueso<span>La extracción superó el tiempo objetivo</span>';
+    recMolienda.style.display = 'flex';
+    tempActualEl.textContent = '92°c';
+    tempSugeridaEl.textContent = '94°c';
+    msgEl.innerHTML = 'La acidez alta indica <strong>sub-extracción</strong>. Subí la temperatura <strong>+2°c</strong> para aumentar la solubilidad y balancear el perfil dentro del rango de tueste medio.';
+    comentarioEl.innerHTML = 'Teniendo en cuenta que tu temperatura es de <strong>92°c</strong>, quizá el tipo de tueste de tu café es <strong>más claro de lo que indica el tostador</strong>.';
+    comentarioEl.style.display = 'block';
+    recTempNormal.style.display = 'block';
+
+  } else if (tipo === 'faltante') {
+    // Tueste medio, 90°c, astringencia 4 → bajar temperatura, sin límite
+    deltaValor.textContent = '−22s Faltantes';
+    deltaValor.className = 'tiempo-bloque-valor faltante';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Tiempo Faltante';
+    recMolienda.className = 'recomendacion-molienda fino';
+    recMolienda.querySelector('.rec-texto').innerHTML = 'Moler más Fino<span>La extracción no alcanzó el tiempo objetivo</span>';
+    recMolienda.style.display = 'flex';
+    tempActualEl.textContent = '90°c';
+    tempSugeridaEl.textContent = '88°c';
+    msgEl.innerHTML = 'La astringencia alta indica <strong>sobre-extracción</strong>. Bajá la temperatura <strong>−2°c</strong> para reducir la solubilidad y balancear el perfil dentro del rango de tueste medio.';
+    comentarioEl.style.display = 'none';
+    recTempNormal.style.display = 'block';
+
+  } else if (tipo === 'nulo') {
+    deltaValor.textContent = '—';
+    deltaValor.className = 'tiempo-bloque-valor';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Sin fase final';
+    recMolienda.style.display = 'none';
+    tempActualEl.textContent = '92°c';
+    tempSugeridaEl.textContent = '94°c';
+    msgEl.innerHTML = 'La acidez alta indica <strong>sub-extracción</strong>. Subí la temperatura <strong>+2°c</strong> para balancear el perfil.';
+    comentarioEl.style.display = 'none';
+    recTempNormal.style.display = 'block';
+
+  } else if (tipo === 'incompat') {
+    deltaValor.textContent = '+15s Extra';
+    deltaValor.className = 'tiempo-bloque-valor extra';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Tiempo Extra';
+    recMolienda.className = 'recomendacion-molienda grueso';
+    recMolienda.querySelector('.rec-texto').innerHTML = 'Moler más Grueso<span>La extracción superó el tiempo objetivo</span>';
+    recMolienda.style.display = 'flex';
+    recTempIncompat.style.display = 'block';
+
+  } else if (tipo === 'limite-techo') {
+    // Tueste medio, 92°c, acidez 3, amargor 2, astringencia 1 → llega justo al techo
+    deltaValor.textContent = '+8s Extra';
+    deltaValor.className = 'tiempo-bloque-valor extra';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Tiempo Extra';
+    recMolienda.className = 'recomendacion-molienda grueso';
+    recMolienda.querySelector('.rec-texto').innerHTML = 'Moler más Grueso<span>La extracción superó el tiempo objetivo</span>';
+    recMolienda.style.display = 'flex';
+    tempActualEl.textContent = '91°c';
+    tempSugeridaEl.textContent = '92°c';
+    msgEl.innerHTML = 'La acidez moderada indica <strong>leve sub-extracción</strong>. Subí la temperatura <strong>+1°c</strong> para ajustar el balance.';
+    comentarioEl.innerHTML = 'Estás en el <strong>límite superior del rango para tueste medio</strong>. Si la acidez persiste, considerá que tu café podría tener características de <strong>tueste claro</strong>.';
+    comentarioEl.style.display = 'block';
+    recTempNormal.style.display = 'block';
+
+  } else if (tipo === 'limite-piso') {
+    // Tueste medio, 88°c, astringencia 3 → llega justo al piso
+    deltaValor.textContent = '−10s Faltantes';
+    deltaValor.className = 'tiempo-bloque-valor faltante';
+    deltaBloque.querySelector('.tiempo-bloque-label').textContent = 'Tiempo Faltante';
+    recMolienda.className = 'recomendacion-molienda fino';
+    recMolienda.querySelector('.rec-texto').innerHTML = 'Moler más Fino<span>La extracción no alcanzó el tiempo objetivo</span>';
+    recMolienda.style.display = 'flex';
+    tempActualEl.textContent = '89°c';
+    tempSugeridaEl.textContent = '88°c';
+    msgEl.innerHTML = 'La astringencia moderada indica <strong>leve sobre-extracción</strong>. Bajá la temperatura <strong>−1°c</strong> para ajustar el balance.';
+    comentarioEl.innerHTML = 'Estás en el <strong>límite inferior del rango para tueste medio</strong>. Si la astringencia persiste, considerá que tu café podría tener características de <strong>tueste oscuro</strong>.';
+    comentarioEl.style.display = 'block';
+    recTempNormal.style.display = 'block';
+  }
+}
+</script>
+
+</body>
+</html>

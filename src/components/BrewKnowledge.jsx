@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useHistory } from '../hooks/useHistory';
+import BrewDetail from './BrewDetail';
 
 const BackArrow = () => (
   <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
@@ -27,7 +29,7 @@ function TimeDeltaBadge({ timeDelta }) {
   return null;
 }
 
-function BrewCard({ entry, onDelete }) {
+function BrewCard({ entry, onDelete, onDetalle }) {
   return (
     <div className="recipe-card">
       {/* Same structure as RecipeList card-top, but right side is date + timedelta instead of color-dot */}
@@ -52,7 +54,7 @@ function BrewCard({ entry, onDelete }) {
 
       {/* Same card-actions dimensions; btn-preparar overridden to celeste via bk-btn-detalle */}
       <div className="card-actions">
-        <button className="btn-preparar bk-btn-detalle">
+        <button className="btn-preparar bk-btn-detalle" onClick={onDetalle}>
           Detalle de la preparación
         </button>
         <button
@@ -68,7 +70,8 @@ function BrewCard({ entry, onDelete }) {
 }
 
 export default function BrewKnowledge({ onBack }) {
-  const { history, deleteBrewEntry } = useHistory();
+  const { history, deleteBrewEntry, updateBrewEntry } = useHistory();
+  const [selectedBrew, setSelectedBrew] = useState(null);
 
   return (
     <div className="bk-screen">
@@ -101,10 +104,24 @@ export default function BrewKnowledge({ onBack }) {
           </div>
         ) : (
           history.map((entry) => (
-            <BrewCard key={entry.id} entry={entry} onDelete={deleteBrewEntry} />
+            <BrewCard
+              key={entry.id}
+              entry={entry}
+              onDelete={deleteBrewEntry}
+              onDetalle={() => setSelectedBrew(entry)}
+            />
           ))
         )}
       </div>
+
+      {/* Bottom sheet modal */}
+      {selectedBrew && (
+        <BrewDetail
+          brew={selectedBrew}
+          onClose={() => setSelectedBrew(null)}
+          onSave={updateBrewEntry}
+        />
+      )}
     </div>
   );
 }

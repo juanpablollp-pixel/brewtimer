@@ -44,5 +44,15 @@ export function useHistory() {
     }
   };
 
-  return { history, deleteBrewEntry };
+  const updateBrewEntry = (id, patch) => {
+    const updated = history.map((e) => e.id === id ? { ...e, ...patch } : e);
+    setHistory(updated);
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    } catch {
+      // localStorage not available
+    }
+  };
+
+  return { history, deleteBrewEntry, updateBrewEntry };
 }
