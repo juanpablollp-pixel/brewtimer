@@ -46,9 +46,7 @@ export default function Timer({ recipe, onExit }) {
   // Calls finish(), saves to history, then returns (doesn't navigate away)
   const handleFinish = () => {
     const delta = finish();
-    const totalTime = recipe.steps
-      .filter((s) => s.type === 'espera')
-      .reduce((acc, s) => acc + (s.duration || 0), 0);
+    const totalTime = recipe.steps.reduce((acc, s) => acc + (s.duration || 0), 0);
     saveBrewToHistory(recipe, delta, totalTime);
   };
 
