@@ -3,7 +3,7 @@ import { useState } from 'react';
 const HISTORY_KEY = 'brewHistory';
 
 // Standalone function — call from anywhere (e.g. Timer.jsx) without a hook
-export function saveBrewToHistory(recipe, timeDelta) {
+export function saveBrewToHistory(recipe, timeDelta, totalTime = 0) {
   const entry = {
     id: Date.now(),
     recipeId: recipe.id,
@@ -14,6 +14,7 @@ export function saveBrewToHistory(recipe, timeDelta) {
     water: recipe.water,
     temperature: recipe.temp,
     ratio: recipe.ratio,
+    totalTime,
     timeDelta: timeDelta ?? { type: null, seconds: null },
   };
   try {
