@@ -55,8 +55,8 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
         {
           name: type === 'vertido' ? 'Vertido' : 'Espera',
           type,
-          targetWater: type === 'vertido' ? 50 : 0,
-          duration: 30,
+          targetWater: 0,
+          duration: 0,
         },
       ],
     }));
@@ -200,6 +200,8 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
                   type="number"
                   value={step.targetWater}
                   onChange={(e) => updateStep(idx, 'targetWater', e.target.value)}
+                  onFocus={(e) => { if (e.target.value === '0') e.target.value = '' }}
+                  onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'targetWater', 0) }}
                   min="0"
                   title="Agua (ml)"
                 />
@@ -211,7 +213,9 @@ export default function RecipeForm({ recipe, onSave, onCancel }) {
               type="number"
               value={step.duration}
               onChange={(e) => updateStep(idx, 'duration', e.target.value)}
-              min="1"
+              onFocus={(e) => { if (e.target.value === '0') e.target.value = '' }}
+              onBlur={(e) => { if (e.target.value === '') updateStep(idx, 'duration', 0) }}
+              min="0"
               title="Duración (s)"
             />
             <span className="step-unit">s</span>
