@@ -29,6 +29,8 @@ function TimeDeltaBadge({ timeDelta }) {
 }
 
 function BrewCard({ entry, onDelete, onDetalle }) {
+  const flavors = entry.sensorAnalysis?.flavorNotes ?? [];
+
   return (
     <div className="recipe-card">
       {/* Same structure as RecipeList card-top, but right side is date + timedelta instead of color-dot */}
@@ -64,16 +66,38 @@ function BrewCard({ entry, onDelete, onDetalle }) {
           ✕
         </button>
       </div>
+
+      {flavors.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 0 4px' }}>
+          {flavors.map(item => (
+            <span
+              key={item.id}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '4px 10px',
+                borderRadius: 20,
+                fontSize: 10,
+                fontWeight: 600,
+                background: item.color,
+                color: item.darkText ? '#111' : '#fff',
+              }}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, selectedBrew, onSelectBrew }) {
+export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, selectedBrew, onSelectBrew, onUpdateBrew }) {
   const { history, deleteBrewEntry, updateBrewEntry } = useHistory();
 
   const handleSave = (id, updates) => {
     updateBrewEntry(id, updates);
-    onSelectBrew(prev => prev ? { ...prev, ...updates } : prev);
+    onUpdateBrew(id, updates);
   };
 
   return (

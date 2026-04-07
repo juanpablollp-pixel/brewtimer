@@ -52,6 +52,10 @@ export default function App() {
     setView('knowledge');
   };
 
+  const handleUpdateBrew = (id, updates) => {
+    setSelectedBrew(prev => prev?.id === id ? { ...prev, ...updates } : prev);
+  };
+
   return (
     <div className="app">
       {view === 'list' && (
@@ -85,6 +89,7 @@ export default function App() {
           onOpenChecklist={openChecklist}
           selectedBrew={selectedBrew}
           onSelectBrew={setSelectedBrew}
+          onUpdateBrew={handleUpdateBrew}
         />
       )}
       {view === 'flavor-wheel' && (

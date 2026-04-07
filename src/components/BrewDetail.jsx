@@ -249,23 +249,15 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
         <div className="bd-seccion">
           <div className="bd-seccion-label">¿A qué sabe mi café?</div>
 
-          <button
-            className="bd-btn-flavor"
-            onClick={() => onOpenChecklist(flavorNotes, setFlavorNotes)}
-          >
-            ¿A qué sabe mi café?
-          </button>
-
           {flavorNotes.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
               {flavorNotes.map(item => (
                 <span
                   key={item.id}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 5,
-                    padding: '4px 10px 4px 8px',
+                    padding: '4px 10px',
                     borderRadius: 20,
                     fontSize: 10,
                     fontWeight: 600,
@@ -278,6 +270,13 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
               ))}
             </div>
           )}
+
+          <button
+            className="bd-btn-flavor"
+            onClick={() => onOpenChecklist(flavorNotes, setFlavorNotes)}
+          >
+            ¿A qué sabe mi café?
+          </button>
         </div>
 
         {/* Botón Guardar */}
