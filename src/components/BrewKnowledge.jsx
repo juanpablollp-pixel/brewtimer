@@ -69,7 +69,7 @@ function BrewCard({ entry, onDelete, onDetalle }) {
   );
 }
 
-export default function BrewKnowledge({ onBack }) {
+export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist }) {
   const { history, deleteBrewEntry, updateBrewEntry } = useHistory();
   const [selectedBrew, setSelectedBrew] = useState(null);
 
@@ -90,7 +90,7 @@ export default function BrewKnowledge({ onBack }) {
 
       {/* Botones — misma clase action-btn, solo se sobreescribe color */}
       <div className="action-row">
-        <button className="action-btn bk-btn-scaa">SCAA Flavor Wheel</button>
+        <button className="action-btn bk-btn-scaa" onClick={onFlavorWheel}>SCAA Flavor Wheel</button>
         <button className="action-btn bk-btn-wcr">WCR Sensory Lexicon</button>
       </div>
 
@@ -120,6 +120,7 @@ export default function BrewKnowledge({ onBack }) {
           brew={selectedBrew}
           onClose={() => setSelectedBrew(null)}
           onSave={updateBrewEntry}
+          onOpenChecklist={onOpenChecklist}
         />
       )}
     </div>

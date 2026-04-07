@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCAA Taster Flavor Wheel — BrewTimer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/afq6ikf.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Exo 2", sans-serif; background: #fff; color: #111; max-width: 430px; margin: 0 auto; padding-bottom: 48px; }
+  .header { padding: 36px 24px 16px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; gap: 14px; }
+  .btn-back { background: none; border: none; font-size: 20px; cursor: pointer; color: #111; padding: 0; line-height: 1; }
+  .header-titulo { font-family: "new-astro", sans-serif; font-size: 22px; color: #111; }
+  .wheel-list { padding: 16px 24px 0; }
+  .cat-item { margin-bottom: 8px; }
+  .cat-btn { width: 100%; border: none; border-radius: 4px; padding: 14px 16px; font-family: "Exo 2", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .cat-btn.dark-text { color: #111; }
+  .cat-arrow { font-size: 10px; transition: transform 0.2s; opacity: 0.8; }
+  .cat-item.open .cat-arrow { transform: rotate(180deg); }
+  .cat-content { display: none; padding: 8px 0 0 16px; }
+  .cat-item.open .cat-content { display: block; }
+  
+  .sub-item { margin-bottom: 6px; position: relative; }
+  .sub-row { position: relative; padding-left: 14px; }
+  .sub-row::before { content: ""; position: absolute; left: -14px; top: 50%; width: 12px; height: 2px; background: #e8e8e8; transform: translateY(-50%); }
+  .sub-btn { width: 100%; border: none; border-radius: 4px; padding: 10px 14px; font-family: "Exo 2", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .sub-btn.dark-text { color: #111; }
+  .sub-content { display: none; padding: 6px 0 0 12px; }
+  .sub-item.open .sub-content { display: block; }
+  
+  .leaf-item { position: relative; margin-bottom: 5px; }
+  .leaf-row { position: relative; padding-left: 12px; }
+  .leaf-row::before { content: ""; position: absolute; left: -14px; top: 50%; width: 12px; height: 2px; background: #e8e8e8; transform: translateY(-50%); }
+  .leaf-btn { width: 100%; border: none; border-radius: 4px; padding: 9px 14px; font-family: "Exo 2", sans-serif; font-size: 11px; font-weight: 400; color: #fff; text-align: left; cursor: default; }
+  .leaf-btn.dark-text { color: #111; }
+
+  
+  .cat-content-inner,
+  .sub-content-inner { border-left: none; position: relative; }
+
+  /* vertical segment for each item except last */
+  .sub-item,
+  .leaf-item {
+    position: relative;
+  }
+
+  
+
+  /* stop vertical line at midpoint of last item */
+  
+
+  /* horizontal connector */
+  .sub-row::before,
+  .leaf-row::before { content: ""; position: absolute; left: -14px; top: 50%; width: 12px; height: 2px; background: #e8e8e8; transform: translateY(-50%); }
+
+
+  
+  .cat-content-inner,
+  .sub-content-inner { border-left: none; position: relative; }
+
+  .sub-item,
+  .leaf-item {
+    position: relative;
+  }
+
+  /* horizontal connector line per item */
+  .sub-row::before,
+  .leaf-row::before { content: ""; position: absolute; left: -14px; top: 50%; width: 12px; height: 2px; background: #e8e8e8; transform: translateY(-50%); }
+
+  /* white block that covers the vertical line below the last item's midpoint */
+  
+
+</style>
+</head>
+<body>
+<div class="header">
+  <button class="btn-back">←</button>
+  <div class="header-titulo">SCAA Taster Flavor Wheel</div>
+</div>
+<div class="wheel-list">
+  <div class="cat-item" id="cat-acido">
+    <button class="cat-btn dark-text" style="background:#f1c920" onclick="toggleCat('acido')">Ácido <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-aromaticosacidos">
+        <div class="sub-row">
+          <button class="sub-btn dark-text" style="background:#b9b82e">Aromáticos Ácidos </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-acetico">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#99bf82">Ácido Acético </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-butirico">
+        <div class="sub-row">
+          <button class="sub-btn dark-text" style="background:#cfc024">Ácido Butírico </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-isovalerico">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#6cb658">Ácido Isovalérico </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-citrico">
+        <div class="sub-row">
+          <button class="sub-btn dark-text" style="background:#e0d118">Ácido Cítrico </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-malico">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#afbd31">Ácido Málico </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-afrutado">
+    <button class="cat-btn" style="background:#d7222a" onclick="toggleCat('afrutado')">Afrutado <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-bayas">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#da2f44" onclick="toggleSub('bayas')">Bayas <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#0f0e15">Mora</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d02f78">Frambuesa</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#606297">Arándano</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d8303a">Fresa</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-citricos">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#f1b22a" onclick="toggleSub('citricos')">Cítricos <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#e15558">Pomelo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#e15558">Naranja</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn dark-text" style="background:#f1d60d">Limón</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#87ba55">Lima</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-frutossecos">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#87ba55" onclick="toggleSub('frutossecos')">Frutos Secos <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#8e256c">Pasa de Uva</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#7c4f80">Pasa de Ciruela</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-otrasfrutas">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#e06148" onclick="toggleSub('otrasfrutas')">Otras Frutas <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d88738">Coco</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d21f52">Cereza</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#df4459">Granada</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#eb952b">Piña</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#95be3f">Uva</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#68b56c">Manzana</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#e57650">Durazno</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#a8a129">Pera</button>
+          </div></div>
+        </div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-cacao">
+    <button class="cat-btn" style="background:#a3692d" onclick="toggleCat('cacao')">Cacao <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-chocolate">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#572722">Chocolate </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-chocolateamargo">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#3a231d">Chocolate Amargo </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-dulce">
+    <button class="cat-btn" style="background:#e15d2a" onclick="toggleCat('dulce')">Dulce <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-aromavainilla">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#e27c80">Aroma de Vainilla </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-aromaticosdu">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#b7385f">Aromáticos Dulces </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-azucarmorena">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#c17486" onclick="toggleSub('azucarmorena')">Azúcar Morena <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d49d33">Caramelizado</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#c45c2d">Jarabe de Arce</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#160812">Melaza</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#e47432">Miel</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-dulcegeneral">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#d06974">Dulce General </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-vainilla">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#e89179">Vainilla </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-especias">
+    <button class="cat-btn" style="background:#9c263b" onclick="toggleCat('especias')">Especias <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-acre">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#614455">Acre </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-especiasmarrones">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#a04244" onclick="toggleSub('especiasmarrones')">Especias Marrones <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#bb972c">Anís</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#da8a30">Canela</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#a27168">Clavo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#8b2423">Nuez Moscada</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-pimienta">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#bf2f33">Pimienta </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-fermentado">
+    <button class="cat-btn" style="background:#a4982d" onclick="toggleCat('fermentado')">Fermentado <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-avinarado">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#8a235f">Avinarado </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-fermentadosub">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#c7a024">Fermentado </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-sobremaduro">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#70692f">Sobre Maduro </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-whisky">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#983c4a">Whisky </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-floral">
+    <button class="cat-btn" style="background:#cc2b7d" onclick="toggleCat('floral')">Floral <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-floralsub">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#d55a89" onclick="toggleSub('floralsub')">Floral <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn dark-text" style="background:#fefde5">Jazmín</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#e9a838">Manzanilla</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#cd7298">Rosa</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-tenegro">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#996272">Té Negro </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-nueces">
+    <button class="cat-btn" style="background:#a78a7c" onclick="toggleCat('nueces')">Nueces <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-almendra">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#c9a392">Almendra </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-avellana">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#7e5728">Avellana </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-mani">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#d8b02f">Maní </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-otros">
+    <button class="cat-btn" style="background:#309bbd" onclick="toggleCat('otros')">Otros <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-papelhumedad">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#9eb6c0" onclick="toggleSub('papelhumedad')">Papel / Humedad <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#9b9972">Animal</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#b87c70">Carne / Caldo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d3ba4e">Cartón</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d47a7e">Fenólico</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#65522f">Madera</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#9da270">Mohoso / Humedad</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn dark-text" style="background:#fffdfe">Papel</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#627662">Rancio</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#bfa167">Rancio / Polvo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#897c4d">Rancio / Tierra</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-quimico">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#75becb" onclick="toggleSub('quimico')">Químico <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#7fbfb1">Amargo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#031120">Goma</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#6a9faf">Medicinal</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#359fad">Petróleo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn dark-text" style="background:#f9fbfc">Salado</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#607b86">Zorrillo</button>
+          </div></div>
+        </div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-tostado">
+    <button class="cat-btn" style="background:#ba4230" onclick="toggleCat('tostado')">Tostado <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-cereal">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#ba4230" onclick="toggleSub('cereal')">Cereal <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#c39d7f">Grano</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#d99463">Malta</button>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="sub-item" id="sub-tabaco">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#c3af7d">Tabaco </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-tabacoPipa">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#9d8f5e">Tabaco de Pipa </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-quemado">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#a67a4c" onclick="toggleSub('quemado')">Quemado <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#a49866">Acre</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#8f9f88">Ceniza</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#997639">Humo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#6f5029">Marrón / Tostado</button>
+          </div></div>
+        </div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="cat-item" id="cat-vegetal">
+    <button class="cat-btn" style="background:#6f5029" onclick="toggleCat('vegetal')">Vegetal / Verde <span class="cat-arrow">▼</span></button>
+    <div class="cat-content"><div class="cat-content-inner">
+      <div class="sub-item" id="sub-aceiteoliva">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#9fa63f">Aceite de Oliva </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-crudo">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#6b813d">Crudo </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-leguminoso">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#749689">Leguminoso </button>
+        </div>
+      </div>
+      <div class="sub-item" id="sub-verdevegetal">
+        <div class="sub-row">
+          <button class="sub-btn" style="background:#45a451" onclick="toggleSub('verdevegetal')">Verde / Vegetal <span class="cat-arrow">▼</span></button>
+        </div>
+        <div class="sub-content"><div class="sub-content-inner">
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#3d9e68">Fresco</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#969532">Heno</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#82b85d">Herbáceo</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#abc14f">Inmaduro</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#5fa94b">Vaina</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#46a26a">Vegetal</button>
+          </div></div>
+          <div class="leaf-item"><div class="leaf-row">
+            <button class="leaf-btn" style="background:#1f5339">Verde Oscuro</button>
+          </div></div>
+        </div></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<script>
+function toggleCat(id) {
+  document.querySelectorAll(".cat-item").forEach(item => {
+    if (item.id === "cat-" + id) item.classList.toggle("open");
+    else { item.classList.remove("open"); item.querySelectorAll(".sub-item").forEach(s => s.classList.remove("open")); }
+  });
+}
+function toggleSub(id) {
+  const target = document.getElementById("sub-" + id);
+  if (!target) return;
+  const parent = target.closest(".cat-content-inner");
+  parent.querySelectorAll(".sub-item").forEach(s => {
+    if (s === target) s.classList.toggle("open"); else s.classList.remove("open");
+  });
+}
+</script>
+
+
+
+
+<script>
+function fixConnectors() {
+  document.querySelectorAll('.cat-content-inner, .sub-content-inner').forEach(container => {
+    const items = Array.from(container.children).filter(el =>
+      el.classList.contains('sub-item') || el.classList.contains('leaf-item')
+    );
+    if (items.length === 0) return;
+
+    const last = items[items.length - 1];
+    const lastRow = last.querySelector('.sub-row, .leaf-row');
+    if (!lastRow) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const lastRowRect = lastRow.getBoundingClientRect();
+    const height = (lastRowRect.top + lastRowRect.height / 2) - containerRect.top;
+
+    // Remove old vline
+    const old = container.querySelector(':scope > .vline');
+    if (old) old.remove();
+
+    const line = document.createElement('div');
+    line.className = 'vline';
+    line.style.cssText = [
+      'position: absolute',
+      'left: -14px',
+      'top: 0',
+      'width: 2px',
+      'background: #e8e8e8',
+      'pointer-events: none',
+      'height: ' + Math.round(height) + 'px'
+    ].join(';');
+
+    container.style.position = 'relative';
+    container.prepend(line);
+  });
+}
+window.addEventListener('load', fixConnectors);
+document.addEventListener('click', () => setTimeout(fixConnectors, 50));
+</script>
+
+</body></html>

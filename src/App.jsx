@@ -1,16 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRecipes } from './hooks/useRecipes';
 import RecipeList from './components/RecipeList';
 import RecipeForm from './components/RecipeForm';
 import RatioCalculator from './components/RatioCalculator';
 import Timer from './components/Timer';
 import BrewKnowledge from './components/BrewKnowledge';
+import FlavorWheel from './components/FlavorWheel';
+import FlavorChecklist from './components/FlavorChecklist';
 
 export default function App() {
-  const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge
+  const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge | flavor-wheel | flavor-checklist
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [timerRecipe, setTimerRecipe] = useState(null);
   const { recipes, saveRecipe, deleteRecipe } = useRecipes();
+
+  // Checklist state lifted to App so BrewDetail can open it and receive results
+  const checklistCallbackRef = useRef(null);
+  const [checklistInitial, setChecklistInitial] = useState([]);
 
   // Apply saved theme
   useEffect(() => {
@@ -23,6 +29,27 @@ export default function App() {
   const goToList = () => setView('list');
   const goToRatio = () => setView('ratio');
   const goToKnowledge = () => setView('knowledge');
+  const goToFlavorWheel = () => setView('flavor-wheel');
+
+  // Called by BrewDetail to open the checklist
+  const openChecklist = (currentNotes, setFlavorNotes) => {
+    checklistCallbackRef.current = setFlavorNotes;
+    setChecklistInitial(currentNotes);
+    setView('flavor-checklist');
+  };
+
+  const handleChecklistSave = (selection) => {
+    if (checklistCallbackRef.current) {
+      checklistCallbackRef.current(selection);
+      checklistCallbackRef.current = null;
+    }
+    setView('knowledge');
+  };
+
+  const handleChecklistBack = () => {
+    checklistCallbackRef.current = null;
+    setView('knowledge');
+  };
 
   return (
     <div className="app">
@@ -51,7 +78,21 @@ export default function App() {
         <Timer recipe={timerRecipe} onExit={goToList} />
       )}
       {view === 'knowledge' && (
-        <BrewKnowledge onBack={goToList} />
+        <BrewKnowledge
+          onBack={goToList}
+          onFlavorWheel={goToFlavorWheel}
+          onOpenChecklist={openChecklist}
+        />
+      )}
+      {view === 'flavor-wheel' && (
+        <FlavorWheel onBack={goToKnowledge} />
+      )}
+      {view === 'flavor-checklist' && (
+        <FlavorChecklist
+          initialSelection={checklistInitial}
+          onSave={handleChecklistSave}
+          onBack={handleChecklistBack}
+        />
       )}
     </div>
   );

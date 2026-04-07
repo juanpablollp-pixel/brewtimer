@@ -112,11 +112,12 @@ function RecTemp({ resultado }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function BrewDetail({ brew, onClose, onSave }) {
+export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
   const [tueste, setTueste]           = useState(brew.sensorAnalysis?.tueste  ?? null);
   const [acidez, setAcidez]           = useState(brew.sensorAnalysis?.acidez  ?? null);
   const [amargor, setAmargor]         = useState(brew.sensorAnalysis?.amargor ?? null);
   const [astringencia, setAstringencia] = useState(brew.sensorAnalysis?.astringencia ?? null);
+  const [flavorNotes, setFlavorNotes] = useState(brew.sensorAnalysis?.flavorNotes ?? []);
 
   const canShowRec = tueste !== null && acidez !== null && amargor !== null && astringencia !== null;
 
@@ -134,6 +135,7 @@ export default function BrewDetail({ brew, onClose, onSave }) {
         amargor,
         astringencia,
         tempSugerida,
+        flavorNotes,
         savedAt: new Date().toISOString(),
       },
     });
@@ -241,6 +243,41 @@ export default function BrewDetail({ brew, onClose, onSave }) {
 
           {/* Recomendación de temperatura */}
           {canShowRec && <RecTemp resultado={resultado} />}
+        </div>
+
+        {/* Sección: ¿A qué sabe mi café? */}
+        <div className="bd-seccion">
+          <div className="bd-seccion-label">¿A qué sabe mi café?</div>
+
+          <button
+            className="bd-btn-flavor"
+            onClick={() => onOpenChecklist(flavorNotes, setFlavorNotes)}
+          >
+            ¿A qué sabe mi café?
+          </button>
+
+          {flavorNotes.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+              {flavorNotes.map(item => (
+                <span
+                  key={item.id}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '4px 10px 4px 8px',
+                    borderRadius: 20,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    background: item.color,
+                    color: item.darkText ? '#111' : '#fff',
+                  }}
+                >
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Botón Guardar */}

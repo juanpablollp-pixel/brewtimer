@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿A qué sabe mi café? — BrewTimer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/afq6ikf.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Exo 2", sans-serif; background: #fff; color: #111; max-width: 430px; margin: 0 auto; padding-bottom: 48px; }
+
+  .sticky-header { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid #e8e8e8; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .btn-back { background: none; border: none; font-size: 20px; cursor: pointer; color: #111; padding: 0; }
+  .header-titulo { font-family: "new-astro", sans-serif; font-size: 19px; color: #111; }
+  .btn-listo { font-family: "Exo 2", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; background: #4a7c59; color: #fff; border: none; border-radius: 4px; padding: 10px 18px; cursor: pointer; }
+
+  .chips-section { padding: 14px 24px; border-bottom: 1px solid #e8e8e8; min-height: 52px; }
+  .chips-label { font-size: 9px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #bbb; margin-bottom: 8px; }
+  .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; color: #fff; }
+  .chip.dark-text { color: #111; }
+  .chip-x { font-size: 10px; opacity: 0.8; cursor: pointer; }
+  .chips-empty { font-size: 11px; font-weight: 300; color: #bbb; font-style: italic; }
+
+  .wheel-list { padding: 16px 24px 0; }
+
+  /* LEVEL 1 */
+  .cat-item { margin-bottom: 8px; }
+  .cat-row { display: flex; align-items: center; gap: 8px; }
+  .cat-btn { flex: 1; border: none; border-radius: 4px; padding: 14px 16px; font-family: "Exo 2", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .cat-btn.dark-text { color: #111; }
+  .cat-arrow { font-size: 10px; transition: transform 0.2s; opacity: 0.8; }
+  .cat-item.open > .cat-row .cat-arrow { transform: rotate(180deg); }
+
+  /* EXPAND AREA — flex row: [connector-col 14px] [content] */
+  .cat-content { display: none; padding-top: 6px; padding-left: 32px; position: relative; }
+  .cat-item.open > .cat-content { display: flex; }
+
+  .sub-content { display: none; padding-top: 6px; padding-left: 28px; position: relative; }
+  .sub-item.open > .sub-content { display: flex; }
+
+  /* vertical connector column */
+  .connector-col { position: absolute; left: 32px; top: 0; width: 2px; background: #e8e8e8; }
+  .sub-content > .connector-col { left: 28px; }
+
+  /* inner content */
+  .cat-content-inner,
+  .sub-content-inner { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+  /* LEVEL 2 row */
+  .sub-row { display: flex; align-items: center; gap: 8px; position: relative; }
+  .leaf-row { display: flex; align-items: center; gap: 8px; position: relative; }
+
+  /* horizontal line — sits in its own 14px slot before the check */
+  .h-line { width: 14px; height: 2px; background: #e8e8e8; flex-shrink: 0; }
+
+  .sub-btn { flex: 1; border: none; border-radius: 4px; padding: 10px 14px; font-family: "Exo 2", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .sub-btn.dark-text { color: #111; }
+  .leaf-btn { flex: 1; border: none; border-radius: 4px; padding: 9px 14px; font-family: "Exo 2", sans-serif; font-size: 11px; font-weight: 400; color: #fff; text-align: left; cursor: pointer; }
+  .leaf-btn.dark-text { color: #111; }
+
+  /* CHECK CIRCLE */
+  .custom-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #e8e8e8; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 12px; color: transparent; transition: all 0.15s; }
+  .custom-check.checked { color: #fff; border-color: transparent; }
+  .custom-check.checked.dark-check { color: #111; }
+</style>
+</head>
+<body>
+<div class="sticky-header">
+  <div class="header-left">
+    <button class="btn-back">←</button>
+    <div class="header-titulo">¿A qué sabe mi café?</div>
+  </div>
+  <button class="btn-listo" id="btn-listo">Listo</button>
+</div>
+<div class="chips-section">
+  <div class="chips-label">Seleccionados</div>
+  <div class="chips-wrap" id="chips-wrap">
+    <span class="chips-empty" id="chips-empty">Ningún sabor seleccionado</span>
+  </div>
+</div>
+<div class="wheel-list">
+  <div class="cat-item" id="cat-acido">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-acido" data-id="acido" data-label="Ácido" data-color="#f1c920" data-dark="true">✓</div>
+      <button class="cat-btn dark-text" style="background:#f1c920" onclick="toggleCat('acido')">Ácido <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-acido"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-aromaticosacidos">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-aromaticosacidos" data-id="aromaticosacidos" data-label="Aromáticos Ácidos" data-color="#b9b82e" data-dark="true">✓</div>
+            <button class="sub-btn dark-text" style="background:#b9b82e">Aromáticos Ácidos </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-acetico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-acetico" data-id="acetico" data-label="Ácido Acético" data-color="#99bf82" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#99bf82">Ácido Acético </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-butirico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-butirico" data-id="butirico" data-label="Ácido Butírico" data-color="#cfc024" data-dark="true">✓</div>
+            <button class="sub-btn dark-text" style="background:#cfc024">Ácido Butírico </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-isovalerico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-isovalerico" data-id="isovalerico" data-label="Ácido Isovalérico" data-color="#6cb658" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#6cb658">Ácido Isovalérico </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-citrico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-citrico" data-id="citrico" data-label="Ácido Cítrico" data-color="#e0d118" data-dark="true">✓</div>
+            <button class="sub-btn dark-text" style="background:#e0d118">Ácido Cítrico </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-malico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-malico" data-id="malico" data-label="Ácido Málico" data-color="#afbd31" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#afbd31">Ácido Málico </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-afrutado">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-afrutado" data-id="afrutado" data-label="Afrutado" data-color="#d7222a" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#d7222a" onclick="toggleCat('afrutado')">Afrutado <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-afrutado"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-bayas">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-bayas" data-id="bayas" data-label="Bayas" data-color="#da2f44" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#da2f44" onclick="toggleSub('bayas')">Bayas <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-bayas"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-mora">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-mora" data-id="mora" data-label="Mora" data-color="#0f0e15" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#0f0e15">Mora</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-frambuesa">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-frambuesa" data-id="frambuesa" data-label="Frambuesa" data-color="#d02f78" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d02f78">Frambuesa</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-arandano">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-arandano" data-id="arandano" data-label="Arándano" data-color="#606297" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#606297">Arándano</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-fresa">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-fresa" data-id="fresa" data-label="Fresa" data-color="#d8303a" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d8303a">Fresa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-citricos">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-citricos" data-id="citricos" data-label="Cítricos" data-color="#f1b22a" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#f1b22a" onclick="toggleSub('citricos')">Cítricos <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-citricos"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-pomelo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-pomelo" data-id="pomelo" data-label="Pomelo" data-color="#e15558" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#e15558">Pomelo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-naranja">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-naranja" data-id="naranja" data-label="Naranja" data-color="#e15558" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#e15558">Naranja</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-limon">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-limon" data-id="limon" data-label="Limón" data-color="#f1d60d" data-dark="true">✓</div>
+                  <button class="leaf-btn dark-text" style="background:#f1d60d">Limón</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-lima">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-lima" data-id="lima" data-label="Lima" data-color="#87ba55" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#87ba55">Lima</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-frutossecos">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-frutossecos" data-id="frutossecos" data-label="Frutos Secos" data-color="#87ba55" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#87ba55" onclick="toggleSub('frutossecos')">Frutos Secos <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-frutossecos"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-pasauva">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-pasauva" data-id="pasauva" data-label="Pasa de Uva" data-color="#8e256c" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#8e256c">Pasa de Uva</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-pasaciruela">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-pasaciruela" data-id="pasaciruela" data-label="Pasa de Ciruela" data-color="#7c4f80" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#7c4f80">Pasa de Ciruela</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-otrasfrutas">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-otrasfrutas" data-id="otrasfrutas" data-label="Otras Frutas" data-color="#e06148" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#e06148" onclick="toggleSub('otrasfrutas')">Otras Frutas <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-otrasfrutas"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-coco">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-coco" data-id="coco" data-label="Coco" data-color="#d88738" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d88738">Coco</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-cereza">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-cereza" data-id="cereza" data-label="Cereza" data-color="#d21f52" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d21f52">Cereza</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-granada">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-granada" data-id="granada" data-label="Granada" data-color="#df4459" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#df4459">Granada</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-pina">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-pina" data-id="pina" data-label="Piña" data-color="#eb952b" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#eb952b">Piña</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-uva">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-uva" data-id="uva" data-label="Uva" data-color="#95be3f" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#95be3f">Uva</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-manzana">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-manzana" data-id="manzana" data-label="Manzana" data-color="#68b56c" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#68b56c">Manzana</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-durazno">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-durazno" data-id="durazno" data-label="Durazno" data-color="#e57650" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#e57650">Durazno</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-pera">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-pera" data-id="pera" data-label="Pera" data-color="#a8a129" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#a8a129">Pera</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-cacao">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-cacao" data-id="cacao" data-label="Cacao" data-color="#a3692d" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#a3692d" onclick="toggleCat('cacao')">Cacao <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-cacao"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-chocolate">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-chocolate" data-id="chocolate" data-label="Chocolate" data-color="#572722" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#572722">Chocolate </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-chocolateamargo">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-chocolateamargo" data-id="chocolateamargo" data-label="Chocolate Amargo" data-color="#3a231d" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#3a231d">Chocolate Amargo </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-dulce">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-dulce" data-id="dulce" data-label="Dulce" data-color="#e15d2a" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#e15d2a" onclick="toggleCat('dulce')">Dulce <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-dulce"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-aromavainilla">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-aromavainilla" data-id="aromavainilla" data-label="Aroma de Vainilla" data-color="#e27c80" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#e27c80">Aroma de Vainilla </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-aromaticosdu">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-aromaticosdu" data-id="aromaticosdu" data-label="Aromáticos Dulces" data-color="#b7385f" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#b7385f">Aromáticos Dulces </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-azucarmorena">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-azucarmorena" data-id="azucarmorena" data-label="Azúcar Morena" data-color="#c17486" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#c17486" onclick="toggleSub('azucarmorena')">Azúcar Morena <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-azucarmorena"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-caramelizado">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-caramelizado" data-id="caramelizado" data-label="Caramelizado" data-color="#d49d33" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d49d33">Caramelizado</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-jarabe">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-jarabe" data-id="jarabe" data-label="Jarabe de Arce" data-color="#c45c2d" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#c45c2d">Jarabe de Arce</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-melaza">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-melaza" data-id="melaza" data-label="Melaza" data-color="#160812" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#160812">Melaza</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-miel">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-miel" data-id="miel" data-label="Miel" data-color="#e47432" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#e47432">Miel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-dulcegeneral">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-dulcegeneral" data-id="dulcegeneral" data-label="Dulce General" data-color="#d06974" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#d06974">Dulce General </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-vainilla">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-vainilla" data-id="vainilla" data-label="Vainilla" data-color="#e89179" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#e89179">Vainilla </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-especias">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-especias" data-id="especias" data-label="Especias" data-color="#9c263b" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#9c263b" onclick="toggleCat('especias')">Especias <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-especias"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-acre">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-acre" data-id="acre" data-label="Acre" data-color="#614455" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#614455">Acre </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-especiasmarrones">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-especiasmarrones" data-id="especiasmarrones" data-label="Especias Marrones" data-color="#a04244" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#a04244" onclick="toggleSub('especiasmarrones')">Especias Marrones <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-especiasmarrones"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-anis">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-anis" data-id="anis" data-label="Anís" data-color="#bb972c" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#bb972c">Anís</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-canela">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-canela" data-id="canela" data-label="Canela" data-color="#da8a30" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#da8a30">Canela</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-clavo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-clavo" data-id="clavo" data-label="Clavo" data-color="#a27168" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#a27168">Clavo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-nuezmoscada">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-nuezmoscada" data-id="nuezmoscada" data-label="Nuez Moscada" data-color="#8b2423" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#8b2423">Nuez Moscada</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-pimienta">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-pimienta" data-id="pimienta" data-label="Pimienta" data-color="#bf2f33" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#bf2f33">Pimienta </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-fermentado">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-fermentado" data-id="fermentado" data-label="Fermentado" data-color="#a4982d" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#a4982d" onclick="toggleCat('fermentado')">Fermentado <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-fermentado"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-avinarado">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-avinarado" data-id="avinarado" data-label="Avinarado" data-color="#8a235f" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#8a235f">Avinarado </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-fermentadosub">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-fermentadosub" data-id="fermentadosub" data-label="Fermentado" data-color="#c7a024" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#c7a024">Fermentado </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-sobremaduro">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-sobremaduro" data-id="sobremaduro" data-label="Sobre Maduro" data-color="#70692f" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#70692f">Sobre Maduro </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-whisky">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-whisky" data-id="whisky" data-label="Whisky" data-color="#983c4a" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#983c4a">Whisky </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-floral">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-floral" data-id="floral" data-label="Floral" data-color="#cc2b7d" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#cc2b7d" onclick="toggleCat('floral')">Floral <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-floral"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-floralsub">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-floralsub" data-id="floralsub" data-label="Floral" data-color="#d55a89" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#d55a89" onclick="toggleSub('floralsub')">Floral <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-floralsub"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-jazmin">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-jazmin" data-id="jazmin" data-label="Jazmín" data-color="#fefde5" data-dark="true">✓</div>
+                  <button class="leaf-btn dark-text" style="background:#fefde5">Jazmín</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-manzanilla">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-manzanilla" data-id="manzanilla" data-label="Manzanilla" data-color="#e9a838" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#e9a838">Manzanilla</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-rosa">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-rosa" data-id="rosa" data-label="Rosa" data-color="#cd7298" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#cd7298">Rosa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-tenegro">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-tenegro" data-id="tenegro" data-label="Té Negro" data-color="#996272" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#996272">Té Negro </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-nueces">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-nueces" data-id="nueces" data-label="Nueces" data-color="#a78a7c" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#a78a7c" onclick="toggleCat('nueces')">Nueces <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-nueces"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-almendra">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-almendra" data-id="almendra" data-label="Almendra" data-color="#c9a392" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#c9a392">Almendra </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-avellana">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-avellana" data-id="avellana" data-label="Avellana" data-color="#7e5728" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#7e5728">Avellana </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-mani">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-mani" data-id="mani" data-label="Maní" data-color="#d8b02f" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#d8b02f">Maní </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-otros">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-otros" data-id="otros" data-label="Otros" data-color="#309bbd" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#309bbd" onclick="toggleCat('otros')">Otros <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-otros"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-papelhumedad">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-papelhumedad" data-id="papelhumedad" data-label="Papel / Humedad" data-color="#9eb6c0" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#9eb6c0" onclick="toggleSub('papelhumedad')">Papel / Humedad <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-papelhumedad"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-animal">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-animal" data-id="animal" data-label="Animal" data-color="#9b9972" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#9b9972">Animal</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-carnecaldo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-carnecaldo" data-id="carnecaldo" data-label="Carne / Caldo" data-color="#b87c70" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#b87c70">Carne / Caldo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-carton">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-carton" data-id="carton" data-label="Cartón" data-color="#d3ba4e" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d3ba4e">Cartón</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-fenolico">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-fenolico" data-id="fenolico" data-label="Fenólico" data-color="#d47a7e" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d47a7e">Fenólico</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-madera">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-madera" data-id="madera" data-label="Madera" data-color="#65522f" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#65522f">Madera</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-mohoso">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-mohoso" data-id="mohoso" data-label="Mohoso / Humedad" data-color="#9da270" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#9da270">Mohoso / Humedad</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-papel">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-papel" data-id="papel" data-label="Papel" data-color="#fffdfe" data-dark="true">✓</div>
+                  <button class="leaf-btn dark-text" style="background:#fffdfe">Papel</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-rancio">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-rancio" data-id="rancio" data-label="Rancio" data-color="#627662" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#627662">Rancio</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-ranciopolvo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-ranciopolvo" data-id="ranciopolvo" data-label="Rancio / Polvo" data-color="#bfa167" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#bfa167">Rancio / Polvo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-ranciotierra">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-ranciotierra" data-id="ranciotierra" data-label="Rancio / Tierra" data-color="#897c4d" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#897c4d">Rancio / Tierra</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-quimico">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-quimico" data-id="quimico" data-label="Químico" data-color="#75becb" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#75becb" onclick="toggleSub('quimico')">Químico <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-quimico"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-amargo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-amargo" data-id="amargo" data-label="Amargo" data-color="#7fbfb1" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#7fbfb1">Amargo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-goma">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-goma" data-id="goma" data-label="Goma" data-color="#031120" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#031120">Goma</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-medicinal">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-medicinal" data-id="medicinal" data-label="Medicinal" data-color="#6a9faf" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#6a9faf">Medicinal</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-petroleo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-petroleo" data-id="petroleo" data-label="Petróleo" data-color="#359fad" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#359fad">Petróleo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-salado">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-salado" data-id="salado" data-label="Salado" data-color="#f9fbfc" data-dark="true">✓</div>
+                  <button class="leaf-btn dark-text" style="background:#f9fbfc">Salado</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-zorrillo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-zorrillo" data-id="zorrillo" data-label="Zorrillo" data-color="#607b86" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#607b86">Zorrillo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-tostado">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-tostado" data-id="tostado" data-label="Tostado" data-color="#ba4230" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#ba4230" onclick="toggleCat('tostado')">Tostado <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-tostado"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-cereal">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-cereal" data-id="cereal" data-label="Cereal" data-color="#ba4230" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#ba4230" onclick="toggleSub('cereal')">Cereal <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-cereal"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-grano">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-grano" data-id="grano" data-label="Grano" data-color="#c39d7f" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#c39d7f">Grano</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-malta">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-malta" data-id="malta" data-label="Malta" data-color="#d99463" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#d99463">Malta</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-tabaco">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-tabaco" data-id="tabaco" data-label="Tabaco" data-color="#c3af7d" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#c3af7d">Tabaco </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-tabacoPipa">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-tabacoPipa" data-id="tabacoPipa" data-label="Tabaco de Pipa" data-color="#9d8f5e" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#9d8f5e">Tabaco de Pipa </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-quemado">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-quemado" data-id="quemado" data-label="Quemado" data-color="#a67a4c" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#a67a4c" onclick="toggleSub('quemado')">Quemado <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-quemado"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-acreq">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-acreq" data-id="acreq" data-label="Acre" data-color="#a49866" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#a49866">Acre</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-ceniza">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-ceniza" data-id="ceniza" data-label="Ceniza" data-color="#8f9f88" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#8f9f88">Ceniza</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-humo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-humo" data-id="humo" data-label="Humo" data-color="#997639" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#997639">Humo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-marrontostado">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-marrontostado" data-id="marrontostado" data-label="Marrón / Tostado" data-color="#6f5029" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#6f5029">Marrón / Tostado</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cat-item" id="cat-vegetal">
+    <div class="cat-row">
+      <div class="custom-check" id="chk-vegetal" data-id="vegetal" data-label="Vegetal / Verde" data-color="#6f5029" data-dark="false">✓</div>
+      <button class="cat-btn" style="background:#6f5029" onclick="toggleCat('vegetal')">Vegetal / Verde <span class="cat-arrow">▼</span></button>
+    </div>
+    <div class="cat-content">
+      <div class="connector-col" id="conn-vegetal"></div>
+      <div class="cat-content-inner">
+        <div class="sub-item" id="sub-aceiteoliva">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-aceiteoliva" data-id="aceiteoliva" data-label="Aceite de Oliva" data-color="#9fa63f" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#9fa63f">Aceite de Oliva </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-crudo">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-crudo" data-id="crudo" data-label="Crudo" data-color="#6b813d" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#6b813d">Crudo </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-leguminoso">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-leguminoso" data-id="leguminoso" data-label="Leguminoso" data-color="#749689" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#749689">Leguminoso </button>
+          </div>
+        </div>
+        <div class="sub-item" id="sub-verdevegetal">
+          <div class="sub-row">
+            <div class="h-line"></div>
+            <div class="custom-check" id="chk-verdevegetal" data-id="verdevegetal" data-label="Verde / Vegetal" data-color="#45a451" data-dark="false">✓</div>
+            <button class="sub-btn" style="background:#45a451" onclick="toggleSub('verdevegetal')">Verde / Vegetal <span class="cat-arrow">▼</span></button>
+          </div>
+          <div class="sub-content">
+            <div class="connector-col" id="conn-verdevegetal"></div>
+            <div class="sub-content-inner">
+              <div class="leaf-item" id="leaf-fresco">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-fresco" data-id="fresco" data-label="Fresco" data-color="#3d9e68" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#3d9e68">Fresco</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-heno">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-heno" data-id="heno" data-label="Heno" data-color="#969532" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#969532">Heno</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-herbaceo">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-herbaceo" data-id="herbaceo" data-label="Herbáceo" data-color="#82b85d" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#82b85d">Herbáceo</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-inmaduro">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-inmaduro" data-id="inmaduro" data-label="Inmaduro" data-color="#abc14f" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#abc14f">Inmaduro</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-vaina">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-vaina" data-id="vaina" data-label="Vaina" data-color="#5fa94b" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#5fa94b">Vaina</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-vegetalsub">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-vegetalsub" data-id="vegetalsub" data-label="Vegetal" data-color="#46a26a" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#46a26a">Vegetal</button>
+                </div>
+              </div>
+              <div class="leaf-item" id="leaf-verdeoscuro">
+                <div class="leaf-row">
+                  <div class="h-line"></div>
+                  <div class="custom-check" id="chk-verdeoscuro" data-id="verdeoscuro" data-label="Verde Oscuro" data-color="#1f5339" data-dark="false">✓</div>
+                  <button class="leaf-btn" style="background:#1f5339">Verde Oscuro</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const sel = new Map();
+
+  document.querySelectorAll(".custom-check").forEach(el => {
+    el.addEventListener("click", () => {
+      const { id, label, color, dark } = el.dataset;
+      const isDark = dark === "true";
+      if (sel.has(id)) {
+        sel.delete(id);
+        el.classList.remove("checked");
+        el.style.cssText = "";
+      } else {
+        sel.set(id, { label, color, dark: isDark });
+        el.classList.add("checked");
+        el.style.background = color;
+        el.style.borderColor = color;
+        el.style.color = isDark ? "#111" : "#fff";
+      }
+      renderChips();
+    });
+  });
+
+  function renderChips() {
+    const wrap = document.getElementById("chips-wrap");
+    const empty = document.getElementById("chips-empty");
+    if (sel.size === 0) { wrap.innerHTML = ""; wrap.appendChild(empty); empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    wrap.innerHTML = "";
+    sel.forEach(({ label, color, dark }, id) => {
+      const chip = document.createElement("span");
+      chip.className = "chip" + (dark ? " dark-text" : "");
+      chip.style.background = color;
+      chip.appendChild(document.createTextNode(label + " "));
+      const x = document.createElement("span");
+      x.className = "chip-x";
+      x.textContent = "✕";
+      x.addEventListener("click", () => document.getElementById("chk-" + id).click());
+      chip.appendChild(x);
+      wrap.appendChild(chip);
+    });
+  }
+
+  function fixConnectors() {
+    document.querySelectorAll(".cat-content, .sub-content").forEach(container => {
+      const col = container.querySelector(":scope > .connector-col");
+      if (!col) return;
+      const inner = container.querySelector(":scope > .cat-content-inner, :scope > .sub-content-inner");
+      if (!inner) return;
+      const rows = Array.from(inner.querySelectorAll(":scope > .sub-item > .sub-row, :scope > .leaf-item > .leaf-row"));
+      if (!rows.length) return;
+      const lastRow = rows[rows.length - 1];
+      const containerTop = container.getBoundingClientRect().top;
+      const lastMid = lastRow.getBoundingClientRect().top + lastRow.getBoundingClientRect().height / 2;
+      col.style.height = Math.round(lastMid - containerTop) + "px";
+      col.style.top = "0px";
+    });
+  }
+
+  function toggleCat(id) {
+    document.querySelectorAll(".cat-item").forEach(item => {
+      if (item.id === "cat-" + id) item.classList.toggle("open");
+      else { item.classList.remove("open"); item.querySelectorAll(".sub-item").forEach(s => s.classList.remove("open")); }
+    });
+    setTimeout(fixConnectors, 20);
+  }
+
+  function toggleSub(id) {
+    const target = document.getElementById("sub-" + id);
+    if (!target) return;
+    const parent = target.closest(".cat-content-inner");
+    parent.querySelectorAll(".sub-item").forEach(s => {
+      if (s === target) s.classList.toggle("open"); else s.classList.remove("open");
+    });
+    setTimeout(fixConnectors, 20);
+  }
+
+  document.getElementById("btn-listo").addEventListener("click", () => {
+    const names = Array.from(sel.values()).map(s => s.label);
+    alert("Guardando: " + (names.length ? names.join(", ") : "ninguno") + "\n\n(En React esto cierra la vista y vuelve al Detalle)");
+  });
+
+  window.addEventListener("load", fixConnectors);
+</script>
+</body></html>
