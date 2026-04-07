@@ -29,11 +29,11 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 8px 14px;
+          padding: 7px 12px;
           font-family: "Exo 2", sans-serif;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #fff;
           cursor: pointer;
@@ -48,19 +48,20 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 6px 12px;
+          padding: 4px 10px;
           font-family: "Exo 2", sans-serif;
-          font-size: 9px;
+          font-size: 7.5px;
           font-weight: 400;
           color: #fff;
           text-align: left;
           cursor: default;
           width: 100%;
+          border-radius: 3px;
         }
         .fw-leaf-btn.dark-text { color: #111; }
 
-        .fw-sub-item { margin-bottom: 6px; }
-        .fw-leaf-item { margin-bottom: 5px; }
+        .fw-sub-item { margin-bottom: 4px; }
+        .fw-leaf-item { margin-bottom: 3px; }
 
         .fw-arrow {
           font-size: 10px;
@@ -97,11 +98,11 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 8px 14px;
+          padding: 7px 12px;
           font-family: "Exo 2", sans-serif;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #fff;
           cursor: pointer;
@@ -115,13 +116,14 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 6px 12px;
+          padding: 4px 10px;
           font-family: "Exo 2", sans-serif;
-          font-size: 9px;
+          font-size: 7.5px;
           font-weight: 400;
           color: #fff;
           text-align: left;
           cursor: pointer;
+          border-radius: 3px;
         }
         .fc-leaf-btn.dark-text { color: #111; }
 
@@ -142,8 +144,8 @@ Error generating stack: `+e.message+`
         }
         .fc-check.checked { color: #fff; }
 
-        .fc-sub-item { margin-bottom: 6px; }
-        .fc-leaf-item { margin-bottom: 5px; }
+        .fc-sub-item { margin-bottom: 4px; }
+        .fc-leaf-item { margin-bottom: 3px; }
 
         .fc-arrow {
           font-size: 10px;
