@@ -10,14 +10,21 @@ function useConnector(innerRef, isOpen, deps = []) {
 
     function measure() {
       if (!innerRef.current) return;
+
       const allRows = Array.from(innerRef.current.querySelectorAll(
-        ':scope > .fc-sub-item > .fc-sub-row, :scope > .fc-leaf-item > .fc-leaf-row'
-      ));
+        '.fc-sub-row, .fc-leaf-row'
+      )).filter(row => {
+        const subContent = row.closest('.fc-sub-content');
+        if (!subContent) return true;
+        return subContent.style.display !== 'none' && subContent.offsetParent !== null;
+      });
+
       if (!allRows.length) return;
+
       const lastRow = allRows[allRows.length - 1];
       const containerRect = innerRef.current.getBoundingClientRect();
-      const rowRect = lastRow.getBoundingClientRect();
-      setHeight(Math.round((rowRect.top + rowRect.height / 2) - containerRect.top));
+      const lastRect = lastRow.getBoundingClientRect();
+      setHeight(Math.round((lastRect.top + lastRect.height / 2) - containerRect.top));
     }
 
     measure();
