@@ -1,40 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
-
-// ── Vertical connector measured via DOM ──────────────────────────────────────
-function useConnector(innerRef, isOpen, deps = []) {
-  const [coords, setCoords] = useState({ top: 0, height: 0 });
-
-  useEffect(() => {
-    if (!isOpen || !innerRef.current) { setCoords({ top: 0, height: 0 }); return; }
-
-    function measure() {
-      if (!innerRef.current) return;
-      const allRows = Array.from(innerRef.current.querySelectorAll('.fc-sub-row, .fc-leaf-row'));
-      if (allRows.length === 0) return;
-
-      const containerRect = innerRef.current.getBoundingClientRect();
-      const firstRect = allRows[0].getBoundingClientRect();
-      const lastRect = allRows[allRows.length - 1].getBoundingClientRect();
-
-      const top = Math.round((firstRect.top + firstRect.height / 2) - containerRect.top);
-      const height = Math.round((lastRect.top + lastRect.height / 2) - containerRect.top) - top;
-
-      setCoords({ top, height });
-    }
-
-    measure();
-    const t1 = setTimeout(measure, 50);
-    const t2 = setTimeout(measure, 150);
-    const ro = new ResizeObserver(measure);
-    ro.observe(innerRef.current);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); ro.disconnect(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, ...deps]);
-
-  return coords;
-}
 
 // ── Check circle ─────────────────────────────────────────────────────────────
 function CheckCircle({ node, selected, onToggle }) {
@@ -54,8 +19,7 @@ function CheckCircle({ node, selected, onToggle }) {
 function LeafNode({ node, selected, onToggle }) {
   return (
     <div className="fc-leaf-item">
-      <div className="fc-leaf-row">
-        <div className="fc-h-line" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <CheckCircle node={node} selected={selected} onToggle={onToggle} />
         <button
           className={`fc-leaf-btn${node.darkText ? ' dark-text' : ''}`}
@@ -72,13 +36,10 @@ function LeafNode({ node, selected, onToggle }) {
 function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
   const hasChildren = node.children && node.children.length > 0;
   const isOpen = openSubId === node.id;
-  const innerRef = useRef(null);
-  const { top, height } = useConnector(innerRef, isOpen);
 
   return (
     <div className="fc-sub-item">
-      <div className="fc-sub-row">
-        <div className="fc-h-line" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <CheckCircle node={node} selected={selected} onToggle={onToggle} />
         <button
           className={`fc-sub-btn${node.darkText ? ' dark-text' : ''}`}
@@ -93,15 +54,10 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
       </div>
 
       {hasChildren && isOpen && (
-        <div style={{ paddingLeft: 28, paddingTop: 6, position: 'relative' }}>
-          {height > 0 && (
-            <div style={{ position: 'absolute', left: 28, top, width: 2, background: '#e8e8e8', height }} />
-          )}
-          <div className="fc-sub-content-inner" ref={innerRef}>
-            {node.children.map(leaf => (
-              <LeafNode key={leaf.id} node={leaf} selected={selected} onToggle={onToggle} />
-            ))}
-          </div>
+        <div style={{ paddingTop: 6 }}>
+          {node.children.map(leaf => (
+            <LeafNode key={leaf.id} node={leaf} selected={selected} onToggle={onToggle} />
+          ))}
         </div>
       )}
     </div>
@@ -112,8 +68,6 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
 function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
   const isOpen = openCatId === node.id;
   const [openSubId, setOpenSubId] = useState(null);
-  const innerRef = useRef(null);
-  const { top, height } = useConnector(innerRef, isOpen, [openSubId]);
 
   useEffect(() => {
     if (!isOpen) setOpenSubId(null);
@@ -138,22 +92,17 @@ function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
       </div>
 
       {isOpen && (
-        <div style={{ paddingLeft: 32, paddingTop: 6, position: 'relative' }}>
-          {height > 0 && (
-            <div style={{ position: 'absolute', left: 32, top, width: 2, background: '#e8e8e8', height }} />
-          )}
-          <div className="fc-cat-content-inner" ref={innerRef}>
-            {node.children.map(sub => (
-              <SubNode
-                key={sub.id}
-                node={sub}
-                selected={selected}
-                onToggle={onToggle}
-                openSubId={openSubId}
-                onToggleSub={handleToggleSub}
-              />
-            ))}
-          </div>
+        <div style={{ paddingTop: 6 }}>
+          {node.children.map(sub => (
+            <SubNode
+              key={sub.id}
+              node={sub}
+              selected={selected}
+              onToggle={onToggle}
+              openSubId={openSubId}
+              onToggleSub={handleToggleSub}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -291,20 +240,6 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
         }
         .fc-cat-btn.dark-text { color: #111; }
 
-        .fc-sub-row,
-        .fc-leaf-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .fc-h-line {
-          width: 14px;
-          height: 2px;
-          background: #e8e8e8;
-          flex-shrink: 0;
-        }
-
         .fc-sub-btn {
           flex: 1;
           border: none;
@@ -356,12 +291,6 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
 
         .fc-sub-item { margin-bottom: 6px; }
         .fc-leaf-item { margin-bottom: 5px; }
-
-        .fc-cat-content-inner,
-        .fc-sub-content-inner {
-          display: flex;
-          flex-direction: column;
-        }
 
         .fc-arrow {
           font-size: 10px;
