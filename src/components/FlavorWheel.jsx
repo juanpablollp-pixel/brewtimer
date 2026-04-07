@@ -6,26 +6,34 @@ function useConnector(innerRef, isOpen) {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    if (!isOpen || !innerRef.current) return;
+    if (!isOpen || !innerRef.current) { setHeight(0); return; }
 
     function measure() {
-      const inner = innerRef.current;
-      if (!inner) return;
-      const items = Array.from(inner.children).filter(
+      if (!innerRef.current) return;
+      const items = Array.from(innerRef.current.children).filter(
         el => el.classList.contains('fw-sub-item') || el.classList.contains('fw-leaf-item')
       );
       if (!items.length) return;
       const last = items[items.length - 1];
       const lastRow = last.querySelector('.fw-sub-row, .fw-leaf-row');
       if (!lastRow) return;
-      const containerRect = inner.getBoundingClientRect();
+      const containerRect = innerRef.current.getBoundingClientRect();
       const rowRect = lastRow.getBoundingClientRect();
       setHeight(Math.round((rowRect.top + rowRect.height / 2) - containerRect.top));
     }
 
     measure();
-    const id = setTimeout(measure, 50);
-    return () => clearTimeout(id);
+    const t1 = setTimeout(measure, 50);
+    const t2 = setTimeout(measure, 150);
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(innerRef.current);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      ro.disconnect();
+    };
   }, [isOpen, innerRef]);
 
   return height;
