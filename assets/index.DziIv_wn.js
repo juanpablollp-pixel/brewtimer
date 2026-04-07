@@ -29,7 +29,7 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 10px 14px;
+          padding: 8px 14px;
           font-family: "Exo 2", sans-serif;
           font-size: 10px;
           font-weight: 700;
@@ -48,9 +48,9 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 9px 14px;
+          padding: 6px 12px;
           font-family: "Exo 2", sans-serif;
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 400;
           color: #fff;
           text-align: left;
@@ -97,7 +97,7 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 10px 14px;
+          padding: 8px 14px;
           font-family: "Exo 2", sans-serif;
           font-size: 10px;
           font-weight: 700;
@@ -115,9 +115,9 @@ Error generating stack: `+e.message+`
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 9px 14px;
+          padding: 6px 12px;
           font-family: "Exo 2", sans-serif;
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 400;
           color: #fff;
           text-align: left;
