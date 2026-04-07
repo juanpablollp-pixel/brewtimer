@@ -13,12 +13,14 @@ function useConnector(innerRef, isOpen) {
       const allRows = Array.from(innerRef.current.querySelectorAll('.fw-sub-row, .fw-leaf-row'));
       if (allRows.length === 0) return;
 
-      const containerRect = innerRef.current.getBoundingClientRect();
+      const parentEl = innerRef.current.parentElement;
+      if (!parentEl) return;
+      const parentRect = parentEl.getBoundingClientRect();
       const firstRect = allRows[0].getBoundingClientRect();
       const lastRect = allRows[allRows.length - 1].getBoundingClientRect();
 
-      const top = Math.round((firstRect.top + firstRect.height / 2) - containerRect.top);
-      const height = Math.round((lastRect.top + lastRect.height / 2) - containerRect.top) - top;
+      const top = Math.round((firstRect.top + firstRect.height / 2) - parentRect.top);
+      const height = Math.round((lastRect.top + lastRect.height / 2) - parentRect.top) - top;
 
       setCoords({ top, height });
     }
