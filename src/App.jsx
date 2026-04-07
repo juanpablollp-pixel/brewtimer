@@ -44,6 +44,14 @@ export default function App() {
       checklistCallbackRef.current(selection);
       checklistCallbackRef.current = null;
     }
+    // Actualizar selectedBrew con los nuevos flavorNotes para que BrewDetail no los pierda
+    setSelectedBrew(prev => prev ? {
+      ...prev,
+      sensorAnalysis: {
+        ...(prev.sensorAnalysis ?? {}),
+        flavorNotes: selection,
+      }
+    } : prev);
     setView('knowledge');
   };
 
