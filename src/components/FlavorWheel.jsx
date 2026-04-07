@@ -10,13 +10,11 @@ function useConnector(innerRef, isOpen) {
 
     function measure() {
       if (!innerRef.current) return;
-      const items = Array.from(innerRef.current.children).filter(
-        el => el.classList.contains('fw-sub-item') || el.classList.contains('fw-leaf-item')
-      );
-      if (!items.length) return;
-      const last = items[items.length - 1];
-      const lastRow = last.querySelector('.fw-sub-row, .fw-leaf-row');
-      if (!lastRow) return;
+      const allRows = Array.from(innerRef.current.querySelectorAll(
+        ':scope > .fw-sub-item > .fw-sub-row, :scope > .fw-leaf-item > .fw-leaf-row'
+      ));
+      if (!allRows.length) return;
+      const lastRow = allRows[allRows.length - 1];
       const containerRect = innerRef.current.getBoundingClientRect();
       const rowRect = lastRow.getBoundingClientRect();
       setHeight(Math.round((rowRect.top + rowRect.height / 2) - containerRect.top));
