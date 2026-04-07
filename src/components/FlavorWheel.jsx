@@ -249,6 +249,8 @@ export default function FlavorWheel({ onBack }) {
 
         .fw-sub-item { margin-bottom: 6px; }
         .fw-leaf-item { margin-bottom: 5px; }
+        .fw-sub-content-inner .fw-leaf-item:last-child { margin-bottom: 0; }
+        .fw-cat-content-inner .fw-sub-item:last-child { margin-bottom: 0; }
 
         .fw-cat-content-inner,
         .fw-sub-content-inner {
