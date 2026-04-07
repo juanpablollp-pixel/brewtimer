@@ -1,55 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
-
-// ── Vertical connector line measured via DOM ─────────────────────────────────
-function useConnector(innerRef, isOpen) {
-  const [coords, setCoords] = useState({ top: 0, height: 0 });
-
-  useEffect(() => {
-    if (!isOpen || !innerRef.current) { setCoords({ top: 0, height: 0 }); return; }
-
-    function measure() {
-      if (!innerRef.current) return;
-      const allRows = Array.from(innerRef.current.querySelectorAll('.fw-sub-row, .fw-leaf-row'));
-      if (allRows.length === 0) return;
-
-      const parentEl = innerRef.current.parentElement;
-      if (!parentEl) return;
-      const parentRect = parentEl.getBoundingClientRect();
-      const firstRect = allRows[0].getBoundingClientRect();
-      const lastRect = allRows[allRows.length - 1].getBoundingClientRect();
-
-      const top = Math.round((firstRect.top + firstRect.height / 2) - parentRect.top);
-      const height = Math.round((lastRect.top + lastRect.height / 2) - parentRect.top) - top;
-
-      setCoords({ top, height });
-    }
-
-    measure();
-    const t1 = setTimeout(measure, 50);
-    const t2 = setTimeout(measure, 150);
-    const ro = new ResizeObserver(measure);
-    ro.observe(innerRef.current);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); ro.disconnect(); };
-  }, [isOpen, innerRef]);
-
-  return coords;
-}
 
 // ── Leaf (level 3) node ──────────────────────────────────────────────────────
 function LeafNode({ node }) {
   return (
     <div className="fw-leaf-item">
-      <div className="fw-leaf-row">
-        <div className="fw-h-line" />
-        <button
-          className={`fw-leaf-btn${node.darkText ? ' dark-text' : ''}`}
-          style={{ background: node.color }}
-        >
-          {node.label}
-        </button>
-      </div>
+      <button
+        className={`fw-leaf-btn${node.darkText ? ' dark-text' : ''}`}
+        style={{ background: node.color }}
+      >
+        {node.label}
+      </button>
     </div>
   );
 }
@@ -58,38 +19,25 @@ function LeafNode({ node }) {
 function SubNode({ node, openSubId, onToggleSub }) {
   const hasChildren = node.children && node.children.length > 0;
   const isOpen = openSubId === node.id;
-  const innerRef = useRef(null);
-  const { top, height } = useConnector(innerRef, isOpen);
 
   return (
     <div className="fw-sub-item">
-      <div className="fw-sub-row">
-        <div className="fw-h-line" />
-        <button
-          className={`fw-sub-btn${node.darkText ? ' dark-text' : ''}`}
-          style={{ background: node.color }}
-          onClick={hasChildren ? () => onToggleSub(node.id) : undefined}
-        >
-          {node.label}
-          {hasChildren && (
-            <span className={`fw-arrow${isOpen ? ' open' : ''}`}>▼</span>
-          )}
-        </button>
-      </div>
+      <button
+        className={`fw-sub-btn${node.darkText ? ' dark-text' : ''}`}
+        style={{ background: node.color }}
+        onClick={hasChildren ? () => onToggleSub(node.id) : undefined}
+      >
+        {node.label}
+        {hasChildren && (
+          <span className={`fw-arrow${isOpen ? ' open' : ''}`}>▼</span>
+        )}
+      </button>
 
       {hasChildren && isOpen && (
-        <div className="fw-sub-content" style={{ paddingLeft: 28, paddingTop: 6, position: 'relative' }}>
-          {height > 0 && (
-            <div
-              className="fw-connector-col"
-              style={{ position: 'absolute', left: 28, top, width: 2, background: '#e8e8e8', height }}
-            />
-          )}
-          <div className="fw-sub-content-inner" ref={innerRef}>
-            {node.children.map(leaf => (
-              <LeafNode key={leaf.id} node={leaf} />
-            ))}
-          </div>
+        <div style={{ paddingTop: 6 }}>
+          {node.children.map(leaf => (
+            <LeafNode key={leaf.id} node={leaf} />
+          ))}
         </div>
       )}
     </div>
@@ -100,10 +48,7 @@ function SubNode({ node, openSubId, onToggleSub }) {
 function CatNode({ node, openCatId, onToggleCat }) {
   const isOpen = openCatId === node.id;
   const [openSubId, setOpenSubId] = useState(null);
-  const innerRef = useRef(null);
-  const { top, height } = useConnector(innerRef, isOpen);
 
-  // Reset sub when cat collapses
   useEffect(() => {
     if (!isOpen) setOpenSubId(null);
   }, [isOpen]);
@@ -124,23 +69,15 @@ function CatNode({ node, openCatId, onToggleCat }) {
       </button>
 
       {isOpen && (
-        <div style={{ paddingLeft: 32, paddingTop: 6, position: 'relative' }}>
-          {height > 0 && (
-            <div
-              className="fw-connector-col"
-              style={{ position: 'absolute', left: 32, top, width: 2, background: '#e8e8e8', height }}
+        <div style={{ paddingTop: 6 }}>
+          {node.children.map(sub => (
+            <SubNode
+              key={sub.id}
+              node={sub}
+              openSubId={openSubId}
+              onToggleSub={handleToggleSub}
             />
-          )}
-          <div className="fw-cat-content-inner" ref={innerRef}>
-            {node.children.map(sub => (
-              <SubNode
-                key={sub.id}
-                node={sub}
-                openSubId={openSubId}
-                onToggleSub={handleToggleSub}
-              />
-            ))}
-          </div>
+          ))}
         </div>
       )}
     </div>
@@ -235,30 +172,8 @@ export default function FlavorWheel({ onBack }) {
         }
         .fw-leaf-btn.dark-text { color: #111; }
 
-        .fw-sub-row,
-        .fw-leaf-row {
-          display: flex;
-          align-items: center;
-          gap: 0;
-        }
-
-        .fw-h-line {
-          width: 14px;
-          height: 2px;
-          background: #e8e8e8;
-          flex-shrink: 0;
-        }
-
         .fw-sub-item { margin-bottom: 6px; }
         .fw-leaf-item { margin-bottom: 5px; }
-        .fw-sub-content-inner .fw-leaf-item:last-child { margin-bottom: 0; }
-        .fw-cat-content-inner .fw-sub-item:last-child { margin-bottom: 0; }
-
-        .fw-cat-content-inner,
-        .fw-sub-content-inner {
-          display: flex;
-          flex-direction: column;
-        }
 
         .fw-arrow {
           font-size: 10px;
