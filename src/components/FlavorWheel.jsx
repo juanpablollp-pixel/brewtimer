@@ -3,45 +3,36 @@ import { FLAVOR_WHEEL } from '../data/flavorWheel';
 
 // ── Vertical connector line measured via DOM ─────────────────────────────────
 function useConnector(innerRef, isOpen) {
-  const [height, setHeight] = useState(0);
+  const [coords, setCoords] = useState({ top: 0, height: 0 });
 
   useEffect(() => {
-    if (!isOpen || !innerRef.current) { setHeight(0); return; }
+    if (!isOpen || !innerRef.current) { setCoords({ top: 0, height: 0 }); return; }
 
     function measure() {
       if (!innerRef.current) return;
+      const allRows = Array.from(innerRef.current.querySelectorAll('.fw-sub-row, .fw-leaf-row'));
+      if (allRows.length === 0) return;
 
-      const allRows = Array.from(innerRef.current.querySelectorAll(
-        '.fw-sub-row, .fw-leaf-row'
-      )).filter(row => {
-        const subContent = row.closest('.fw-sub-content');
-        if (!subContent) return true;
-        return subContent.style.display !== 'none' && subContent.offsetParent !== null;
-      });
-
-      if (!allRows.length) return;
-
-      const lastRow = allRows[allRows.length - 1];
       const containerRect = innerRef.current.getBoundingClientRect();
-      const lastRect = lastRow.getBoundingClientRect();
-      setHeight(Math.round((lastRect.top + lastRect.height / 2) - containerRect.top));
+      const firstRect = allRows[0].getBoundingClientRect();
+      const lastRect = allRows[allRows.length - 1].getBoundingClientRect();
+
+      const top = Math.round((firstRect.top + firstRect.height / 2) - containerRect.top);
+      const height = Math.round((lastRect.top + lastRect.height / 2) - containerRect.top) - top;
+
+      setCoords({ top, height });
     }
 
     measure();
     const t1 = setTimeout(measure, 50);
     const t2 = setTimeout(measure, 150);
-
     const ro = new ResizeObserver(measure);
     ro.observe(innerRef.current);
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      ro.disconnect();
-    };
+    return () => { clearTimeout(t1); clearTimeout(t2); ro.disconnect(); };
   }, [isOpen, innerRef]);
 
-  return height;
+  return coords;
 }
 
 // ── Leaf (level 3) node ──────────────────────────────────────────────────────
@@ -66,7 +57,7 @@ function SubNode({ node, openSubId, onToggleSub }) {
   const hasChildren = node.children && node.children.length > 0;
   const isOpen = openSubId === node.id;
   const innerRef = useRef(null);
-  const connHeight = useConnector(innerRef, isOpen);
+  const { top, height } = useConnector(innerRef, isOpen);
 
   return (
     <div className="fw-sub-item">
@@ -86,10 +77,10 @@ function SubNode({ node, openSubId, onToggleSub }) {
 
       {hasChildren && isOpen && (
         <div className="fw-sub-content" style={{ paddingLeft: 28, paddingTop: 6, position: 'relative' }}>
-          {connHeight > 0 && (
+          {height > 0 && (
             <div
               className="fw-connector-col"
-              style={{ position: 'absolute', left: 28, top: 0, width: 2, background: '#e8e8e8', height: connHeight }}
+              style={{ position: 'absolute', left: 28, top, width: 2, background: '#e8e8e8', height }}
             />
           )}
           <div className="fw-sub-content-inner" ref={innerRef}>
@@ -108,7 +99,7 @@ function CatNode({ node, openCatId, onToggleCat }) {
   const isOpen = openCatId === node.id;
   const [openSubId, setOpenSubId] = useState(null);
   const innerRef = useRef(null);
-  const connHeight = useConnector(innerRef, isOpen);
+  const { top, height } = useConnector(innerRef, isOpen);
 
   // Reset sub when cat collapses
   useEffect(() => {
@@ -132,10 +123,10 @@ function CatNode({ node, openCatId, onToggleCat }) {
 
       {isOpen && (
         <div style={{ paddingLeft: 32, paddingTop: 6, position: 'relative' }}>
-          {connHeight > 0 && (
+          {height > 0 && (
             <div
               className="fw-connector-col"
-              style={{ position: 'absolute', left: 32, top: 0, width: 2, background: '#e8e8e8', height: connHeight }}
+              style={{ position: 'absolute', left: 32, top, width: 2, background: '#e8e8e8', height }}
             />
           )}
           <div className="fw-cat-content-inner" ref={innerRef}>
