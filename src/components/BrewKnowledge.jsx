@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useHistory } from '../hooks/useHistory';
 import BrewDetail from './BrewDetail';
 
@@ -69,9 +68,13 @@ function BrewCard({ entry, onDelete, onDetalle }) {
   );
 }
 
-export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist }) {
+export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, selectedBrew, onSelectBrew }) {
   const { history, deleteBrewEntry, updateBrewEntry } = useHistory();
-  const [selectedBrew, setSelectedBrew] = useState(null);
+
+  const handleSave = (id, updates) => {
+    updateBrewEntry(id, updates);
+    onSelectBrew(prev => prev ? { ...prev, ...updates } : prev);
+  };
 
   return (
     <div className="bk-screen">
@@ -108,7 +111,7 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist }
               key={entry.id}
               entry={entry}
               onDelete={deleteBrewEntry}
-              onDetalle={() => setSelectedBrew(entry)}
+              onDetalle={() => onSelectBrew(entry)}
             />
           ))
         )}
@@ -118,8 +121,8 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist }
       {selectedBrew && (
         <BrewDetail
           brew={selectedBrew}
-          onClose={() => setSelectedBrew(null)}
-          onSave={updateBrewEntry}
+          onClose={() => onSelectBrew(null)}
+          onSave={handleSave}
           onOpenChecklist={onOpenChecklist}
         />
       )}

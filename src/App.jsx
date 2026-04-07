@@ -12,6 +12,7 @@ export default function App() {
   const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge | flavor-wheel | flavor-checklist
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [timerRecipe, setTimerRecipe] = useState(null);
+  const [selectedBrew, setSelectedBrew] = useState(null);
   const { recipes, saveRecipe, deleteRecipe } = useRecipes();
 
   // Checklist state lifted to App so BrewDetail can open it and receive results
@@ -82,6 +83,8 @@ export default function App() {
           onBack={goToList}
           onFlavorWheel={goToFlavorWheel}
           onOpenChecklist={openChecklist}
+          selectedBrew={selectedBrew}
+          onSelectBrew={setSelectedBrew}
         />
       )}
       {view === 'flavor-wheel' && (
