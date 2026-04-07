@@ -244,11 +244,11 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 8px 14px;
+          padding: 7px 12px;
           font-family: "Exo 2", sans-serif;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #fff;
           cursor: pointer;
@@ -262,13 +262,14 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           flex: 1;
           border: none;
           border-radius: 4px;
-          padding: 6px 12px;
+          padding: 4px 10px;
           font-family: "Exo 2", sans-serif;
-          font-size: 9px;
+          font-size: 7.5px;
           font-weight: 400;
           color: #fff;
           text-align: left;
           cursor: pointer;
+          border-radius: 3px;
         }
         .fc-leaf-btn.dark-text { color: #111; }
 
@@ -289,8 +290,8 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
         }
         .fc-check.checked { color: #fff; }
 
-        .fc-sub-item { margin-bottom: 6px; }
-        .fc-leaf-item { margin-bottom: 5px; }
+        .fc-sub-item { margin-bottom: 4px; }
+        .fc-leaf-item { margin-bottom: 3px; }
 
         .fc-arrow {
           font-size: 10px;
