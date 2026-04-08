@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { calcularRecomendacionTemp } from '../utils/brewRecommendations';
 
 function formatDate(isoString) {
@@ -112,14 +112,19 @@ function RecTemp({ resultado }) {
   );
 }
 
+const BackArrow = () => (
+  <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
+    <path d="M17 5H1M1 5L5 1M1 5L5 9" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ── Main component ────────────────────────────────────────────────────────────
-export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
-  const dragControls = useDragControls();
-  const [tueste, setTueste]           = useState(brew.sensorAnalysis?.tueste  ?? null);
-  const [acidez, setAcidez]           = useState(brew.sensorAnalysis?.acidez  ?? null);
-  const [amargor, setAmargor]         = useState(brew.sensorAnalysis?.amargor ?? null);
+export default function BrewDetail({ brew, onBack, onSave, onOpenChecklist }) {
+  const [tueste, setTueste]             = useState(brew.sensorAnalysis?.tueste       ?? null);
+  const [acidez, setAcidez]             = useState(brew.sensorAnalysis?.acidez       ?? null);
+  const [amargor, setAmargor]           = useState(brew.sensorAnalysis?.amargor      ?? null);
   const [astringencia, setAstringencia] = useState(brew.sensorAnalysis?.astringencia ?? null);
-  const [flavorNotes, setFlavorNotes] = useState(brew.sensorAnalysis?.flavorNotes ?? []);
+  const [flavorNotes, setFlavorNotes]   = useState(brew.sensorAnalysis?.flavorNotes  ?? []);
 
   const canShowRec = tueste !== null && acidez !== null && amargor !== null && astringencia !== null;
 
@@ -141,7 +146,7 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
         savedAt: new Date().toISOString(),
       },
     });
-    onClose();
+    onBack();
   };
 
   // TimeDelta display
@@ -158,159 +163,144 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
 
   return (
     <motion.div
-      className="bd-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      onClick={onClose}
+      className="bd-screen"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.3 }}
+      onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
+      style={{ touchAction: 'pan-y' }}
     >
-      <motion.div
-        className="bd-sheet"
-        drag="y"
-        dragControls={dragControls}
-        dragListener={false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.4 }}
-        onDragEnd={(_, info) => { if (info.offset.y > 80) onClose(); }}
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Header */}
+      <div className="screen-header" style={{ marginTop: '16px' }}>
+        <button className="back-btn" onClick={onBack}>
+          <BackArrow /> Volver
+        </button>
+        <span />
+      </div>
 
-        {/* Handle */}
-        <div
-          className="bd-handle"
-          onPointerDown={(e) => dragControls.start(e)}
-          style={{ touchAction: 'none' }}
+      {/* Título */}
+      <div className="bd-header">
+        <div className="bd-titulo">{brew.recipeName}</div>
+        <div className="bd-subtitulo">{brew.method || '—'}</div>
+        <div className="bd-fecha">{formatDate(brew.date)}</div>
+      </div>
+
+      {/* Sección: Detalles de la Receta */}
+      <div className="bd-seccion">
+        <div className="bd-seccion-label">Detalles de la Receta</div>
+
+        <div className="bd-detalle-grid">
+          <div className="bd-detalle-item">
+            <span className="bd-detalle-label">Café</span>
+            <span className="bd-detalle-valor">{brew.coffee}g</span>
+          </div>
+          <div className="bd-detalle-item">
+            <span className="bd-detalle-label">Agua</span>
+            <span className="bd-detalle-valor">{brew.water}ml</span>
+          </div>
+          <div className="bd-detalle-item">
+            <span className="bd-detalle-label">Temperatura</span>
+            <span className="bd-detalle-valor">{brew.temperature}°c</span>
+          </div>
+          <div className="bd-detalle-item">
+            <span className="bd-detalle-label">Ratio</span>
+            <span className="bd-detalle-valor">{fmtRatio(brew.ratio)}</span>
+          </div>
+        </div>
+
+        {/* Tiempo objetivo vs delta */}
+        <div className="bd-tiempo-row">
+          <div className="bd-tiempo-bloque">
+            <span className="bd-tiempo-bloque-label">Tiempo Objetivo</span>
+            <span className="bd-tiempo-bloque-valor">
+              {brew.totalTime ? fmtTime(brew.totalTime) : '—'}
+            </span>
+          </div>
+          <div className="bd-tiempo-bloque">
+            <span className="bd-tiempo-bloque-label">{deltaLabel}</span>
+            <span className={deltaClass}>{deltaValor}</span>
+          </div>
+        </div>
+
+        {/* Recomendación molienda */}
+        <RecMolienda timeDelta={timeDelta} />
+      </div>
+
+      {/* Sección: Análisis Sensorial */}
+      <div className="bd-seccion bd-seccion-sensorial">
+        <div className="bd-seccion-label">Análisis Sensorial</div>
+
+        {/* Selector de tueste */}
+        <div className="bd-tueste-selector">
+          {TUESTES.map(({ key, label, sub }) => (
+            <button
+              key={key}
+              className={`bd-tueste-btn${tueste === key ? ' activo' : ''}`}
+              onClick={() => setTueste(tueste === key ? null : key)}
+            >
+              {label}
+              <span className="bd-tueste-sub">{sub}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Atributos sensoriales */}
+        <CirculosAtributo
+          nombre="Acidez" desc="Sub-extracción" clase="acidez"
+          valor={acidez} onChange={setAcidez}
+        />
+        <CirculosAtributo
+          nombre="Amargor" desc="Punto de balance" clase="amargor"
+          valor={amargor} onChange={setAmargor}
+        />
+        <CirculosAtributo
+          nombre="Astringencia" desc="Sobre-extracción" clase="astringencia"
+          valor={astringencia} onChange={setAstringencia}
         />
 
-        {/* Header */}
-        <div className="bd-header">
-          <div className="bd-titulo">{brew.recipeName}</div>
-          <div className="bd-subtitulo">{brew.method || '—'}</div>
-          <div className="bd-fecha">{formatDate(brew.date)}</div>
-        </div>
+        {/* Recomendación de temperatura */}
+        {canShowRec && <RecTemp resultado={resultado} />}
+      </div>
 
-        {/* Sección: Detalles de la Receta */}
-        <div className="bd-seccion">
-          <div className="bd-seccion-label">Detalles de la Receta</div>
+      {/* Sección: ¿A qué sabe mi café? */}
+      <div className="bd-seccion">
+        <div className="bd-seccion-label">¿A qué sabe mi café?</div>
 
-          <div className="bd-detalle-grid">
-            <div className="bd-detalle-item">
-              <span className="bd-detalle-label">Café</span>
-              <span className="bd-detalle-valor">{brew.coffee}g</span>
-            </div>
-            <div className="bd-detalle-item">
-              <span className="bd-detalle-label">Agua</span>
-              <span className="bd-detalle-valor">{brew.water}ml</span>
-            </div>
-            <div className="bd-detalle-item">
-              <span className="bd-detalle-label">Temperatura</span>
-              <span className="bd-detalle-valor">{brew.temperature}°c</span>
-            </div>
-            <div className="bd-detalle-item">
-              <span className="bd-detalle-label">Ratio</span>
-              <span className="bd-detalle-valor">{fmtRatio(brew.ratio)}</span>
-            </div>
-          </div>
-
-          {/* Tiempo objetivo vs delta */}
-          <div className="bd-tiempo-row">
-            <div className="bd-tiempo-bloque">
-              <span className="bd-tiempo-bloque-label">Tiempo Objetivo</span>
-              <span className="bd-tiempo-bloque-valor">
-                {brew.totalTime ? fmtTime(brew.totalTime) : '—'}
-              </span>
-            </div>
-            <div className="bd-tiempo-bloque">
-              <span className="bd-tiempo-bloque-label">{deltaLabel}</span>
-              <span className={deltaClass}>{deltaValor}</span>
-            </div>
-          </div>
-
-          {/* Recomendación molienda */}
-          <RecMolienda timeDelta={timeDelta} />
-        </div>
-
-        {/* Sección: Análisis Sensorial */}
-        <div className="bd-seccion bd-seccion-sensorial">
-          <div className="bd-seccion-label">Análisis Sensorial</div>
-
-          {/* Selector de tueste */}
-          <div className="bd-tueste-selector">
-            {TUESTES.map(({ key, label, sub }) => (
-              <button
-                key={key}
-                className={`bd-tueste-btn${tueste === key ? ' activo' : ''}`}
-                onClick={() => setTueste(tueste === key ? null : key)}
+        {flavorNotes.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            {flavorNotes.map(item => (
+              <span
+                key={item.id}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '4px 10px',
+                  borderRadius: 20,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  background: item.color,
+                  color: item.darkText ? '#111' : '#fff',
+                }}
               >
-                {label}
-                <span className="bd-tueste-sub">{sub}</span>
-              </button>
+                {item.label}
+              </span>
             ))}
           </div>
+        )}
 
-          {/* Atributos sensoriales */}
-          <CirculosAtributo
-            nombre="Acidez" desc="Sub-extracción" clase="acidez"
-            valor={acidez} onChange={setAcidez}
-          />
-          <CirculosAtributo
-            nombre="Amargor" desc="Punto de balance" clase="amargor"
-            valor={amargor} onChange={setAmargor}
-          />
-          <CirculosAtributo
-            nombre="Astringencia" desc="Sobre-extracción" clase="astringencia"
-            valor={astringencia} onChange={setAstringencia}
-          />
-
-          {/* Recomendación de temperatura */}
-          {canShowRec && <RecTemp resultado={resultado} />}
-        </div>
-
-        {/* Sección: ¿A qué sabe mi café? */}
-        <div className="bd-seccion">
-          <div className="bd-seccion-label">¿A qué sabe mi café?</div>
-
-          {flavorNotes.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-              {flavorNotes.map(item => (
-                <span
-                  key={item.id}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    padding: '4px 10px',
-                    borderRadius: 20,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    background: item.color,
-                    color: item.darkText ? '#111' : '#fff',
-                  }}
-                >
-                  {item.label}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <button
-            className="bd-btn-flavor"
-            onClick={() => onOpenChecklist(flavorNotes, setFlavorNotes)}
-          >
-            ¿A qué sabe mi café?
-          </button>
-        </div>
-
-        {/* Botón Guardar */}
-        <button className="bd-btn-guardar" onClick={handleGuardar}>
-          Guardar Análisis
+        <button
+          className="bd-btn-flavor"
+          onClick={() => onOpenChecklist(flavorNotes, setFlavorNotes)}
+        >
+          ¿A qué sabe mi café?
         </button>
+      </div>
 
-      </motion.div>
+      {/* Botón Guardar */}
+      <button className="bd-btn-guardar" onClick={handleGuardar}>
+        Guardar Análisis
+      </button>
+
     </motion.div>
   );
 }

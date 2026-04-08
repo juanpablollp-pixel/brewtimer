@@ -1,6 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useHistory } from '../hooks/useHistory';
-import BrewDetail from './BrewDetail';
 
 const BackArrow = () => (
   <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
@@ -34,7 +33,6 @@ function BrewCard({ entry, onDelete, onDetalle }) {
 
   return (
     <div className="recipe-card">
-      {/* Same structure as RecipeList card-top, but right side is date + timedelta instead of color-dot */}
       <div className="card-top">
         <div>
           <div className="recipe-name">{entry.recipeName}</div>
@@ -46,7 +44,6 @@ function BrewCard({ entry, onDelete, onDetalle }) {
         </div>
       </div>
 
-      {/* Exact same stats-row / stat structure as RecipeList */}
       <div className="stats-row">
         <div className="stat"><span>Café</span>{entry.coffee}g</div>
         <div className="stat"><span>Agua</span>{entry.water}ml</div>
@@ -54,7 +51,6 @@ function BrewCard({ entry, onDelete, onDetalle }) {
         <div className="stat"><span>Ratio</span>{entry.ratio || '—'}</div>
       </div>
 
-      {/* Same card-actions dimensions; btn-preparar overridden to celeste via bk-btn-detalle */}
       <div className="card-actions">
         <button className="btn-preparar bk-btn-detalle" onClick={onDetalle}>
           Detalle de la preparación
@@ -93,22 +89,17 @@ function BrewCard({ entry, onDelete, onDetalle }) {
   );
 }
 
-export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, selectedBrew, onSelectBrew, onUpdateBrew }) {
-  const { history, deleteBrewEntry, updateBrewEntry } = useHistory();
-
-  const handleSave = (id, updates) => {
-    updateBrewEntry(id, updates);
-    onUpdateBrew(id, updates);
-  };
+export default function BrewKnowledge({ onBack, onFlavorWheel, onDetalle }) {
+  const { history, deleteBrewEntry } = useHistory();
 
   return (
     <motion.div
       className="bk-screen"
-      drag={selectedBrew ? false : "x"}
+      drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0, right: 0.3 }}
       onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
-      style={{ touchAction: selectedBrew ? 'auto' : 'pan-y' }}
+      style={{ touchAction: 'pan-y' }}
     >
       {/* Header */}
       <div className="screen-header" style={{ marginTop: '16px' }}>
@@ -123,7 +114,7 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, 
         <div className="bk-titulo">Conociendo mi Café</div>
       </div>
 
-      {/* Botones — misma clase action-btn, solo se sobreescribe color */}
+      {/* Botones */}
       <div className="action-row">
         <button className="action-btn bk-btn-scaa" onClick={onFlavorWheel}>SCAA Flavor Wheel</button>
         <button className="action-btn bk-btn-wcr">WCR Sensory Lexicon</button>
@@ -143,24 +134,11 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, 
               key={entry.id}
               entry={entry}
               onDelete={deleteBrewEntry}
-              onDetalle={() => onSelectBrew(entry)}
+              onDetalle={() => onDetalle(entry)}
             />
           ))
         )}
       </div>
-
-      {/* Bottom sheet modal */}
-      <AnimatePresence>
-        {selectedBrew && (
-          <BrewDetail
-            key="brew-detail"
-            brew={selectedBrew}
-            onClose={() => onSelectBrew(null)}
-            onSave={handleSave}
-            onOpenChecklist={onOpenChecklist}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

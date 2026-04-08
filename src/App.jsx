@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRecipes } from './hooks/useRecipes';
+import { useHistory } from './hooks/useHistory';
 import RecipeList from './components/RecipeList';
 import RecipeForm from './components/RecipeForm';
 import RatioCalculator from './components/RatioCalculator';
 import Timer from './components/Timer';
 import BrewKnowledge from './components/BrewKnowledge';
+import BrewDetail from './components/BrewDetail';
 import FlavorWheel from './components/FlavorWheel';
 import FlavorChecklist from './components/FlavorChecklist';
 
@@ -23,12 +25,13 @@ const pageTransition = {
 };
 
 export default function App() {
-  const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge | flavor-wheel | flavor-checklist
+  const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge | brew-detail | flavor-wheel | flavor-checklist
   const [direction, setDirection] = useState(1); // 1 = avanzar, -1 = retroceder
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [timerRecipe, setTimerRecipe] = useState(null);
   const [selectedBrew, setSelectedBrew] = useState(null);
   const { recipes, saveRecipe, deleteRecipe } = useRecipes();
+  const { updateBrewEntry } = useHistory();
 
   // Checklist state lifted to App so BrewDetail can open it and receive results
   const checklistCallbackRef = useRef(null);
@@ -45,12 +48,27 @@ export default function App() {
   // Retroceder → nueva pantalla entra desde la izquierda
   const navigateBack = (newView) => { setDirection(-1); setView(newView); };
 
-  const goToForm      = (recipe = null) => { setEditingRecipe(recipe); navigateTo('form'); };
-  const goToTimer     = (recipe) => { setTimerRecipe(recipe); navigateTo('timer'); };
-  const goToList      = () => navigateBack('list');
-  const goToRatio     = () => navigateTo('ratio');
-  const goToKnowledge = () => navigateTo('knowledge');
+  const goToForm        = (recipe = null) => { setEditingRecipe(recipe); navigateTo('form'); };
+  const goToTimer       = (recipe) => { setTimerRecipe(recipe); navigateTo('timer'); };
+  const goToList        = () => navigateBack('list');
+  const goToRatio       = () => navigateTo('ratio');
+  const goToKnowledge   = () => navigateTo('knowledge');
   const goToFlavorWheel = () => navigateTo('flavor-wheel');
+
+  const openBrewDetail = (brew) => {
+    setSelectedBrew(brew);
+    navigateTo('brew-detail');
+  };
+
+  const closeBrewDetail = () => {
+    setSelectedBrew(null);
+    navigateBack('knowledge');
+  };
+
+  const handleSave = (id, updates) => {
+    updateBrewEntry(id, updates);
+    setSelectedBrew(prev => prev?.id === id ? { ...prev, ...updates } : prev);
+  };
 
   // Called by BrewDetail to open the checklist
   const openChecklist = (currentNotes, setFlavorNotes) => {
@@ -72,16 +90,12 @@ export default function App() {
         flavorNotes: selection,
       }
     } : prev);
-    navigateBack('knowledge');
+    navigateBack('brew-detail');
   };
 
   const handleChecklistBack = () => {
     checklistCallbackRef.current = null;
-    navigateBack('knowledge');
-  };
-
-  const handleUpdateBrew = (id, updates) => {
-    setSelectedBrew(prev => prev?.id === id ? { ...prev, ...updates } : prev);
+    navigateBack('brew-detail');
   };
 
   const pageProps = {
@@ -133,10 +147,17 @@ export default function App() {
             <BrewKnowledge
               onBack={goToList}
               onFlavorWheel={goToFlavorWheel}
+              onDetalle={openBrewDetail}
+            />
+          </motion.div>
+        )}
+        {view === 'brew-detail' && selectedBrew && (
+          <motion.div key="brew-detail" {...pageProps}>
+            <BrewDetail
+              brew={selectedBrew}
+              onBack={closeBrewDetail}
+              onSave={handleSave}
               onOpenChecklist={openChecklist}
-              selectedBrew={selectedBrew}
-              onSelectBrew={setSelectedBrew}
-              onUpdateBrew={handleUpdateBrew}
             />
           </motion.div>
         )}
