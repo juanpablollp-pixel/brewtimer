@@ -3,6 +3,16 @@ import { useState } from 'react';
 const HISTORY_KEY = 'brewHistory';
 
 // Standalone function — call from anywhere (e.g. Timer.jsx) without a hook
+export function updateBrewHistory(id, patch) {
+  try {
+    const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const updated = existing.map((e) => e.id === id ? { ...e, ...patch } : e);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  } catch {
+    // localStorage not available
+  }
+}
+
 export function saveBrewToHistory(recipe, timeDelta, totalTime = 0) {
   const entry = {
     id: Date.now(),

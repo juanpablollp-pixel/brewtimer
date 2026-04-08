@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRecipes } from './hooks/useRecipes';
-import { useHistory } from './hooks/useHistory';
+import { updateBrewHistory } from './hooks/useHistory';
 import RecipeList from './components/RecipeList';
 import RecipeForm from './components/RecipeForm';
 import RatioCalculator from './components/RatioCalculator';
@@ -31,7 +31,6 @@ export default function App() {
   const [timerRecipe, setTimerRecipe] = useState(null);
   const [selectedBrew, setSelectedBrew] = useState(null);
   const { recipes, saveRecipe, deleteRecipe } = useRecipes();
-  const { updateBrewEntry } = useHistory();
 
   // Checklist state lifted to App so BrewDetail can open it and receive results
   const checklistCallbackRef = useRef(null);
@@ -66,7 +65,7 @@ export default function App() {
   };
 
   const handleSave = (id, updates) => {
-    updateBrewEntry(id, updates);
+    updateBrewHistory(id, updates);
     setSelectedBrew(prev => prev?.id === id ? { ...prev, ...updates } : prev);
   };
 
