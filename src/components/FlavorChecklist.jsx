@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
 
+function fixConnectors() {
+  document.querySelectorAll('.fc-cat-content, .fc-sub-content').forEach(container => {
+    const col = container.querySelector(':scope > .fc-connector-col');
+    if (!col) return;
+    const inner = container.querySelector(':scope > .fc-cat-content-inner, :scope > .fc-sub-content-inner');
+    if (!inner) return;
+    const rows = Array.from(
+      inner.querySelectorAll(':scope > .fc-sub-item > .fc-sub-row, :scope > .fc-leaf-item > .fc-leaf-row')
+    );
+    if (!rows.length) return;
+    const lastRow = rows[rows.length - 1];
+    const containerTop = container.getBoundingClientRect().top;
+    const lastMid = lastRow.getBoundingClientRect().top + lastRow.getBoundingClientRect().height / 2;
+    col.style.height = Math.round(lastMid - containerTop) + 'px';
+  });
+}
+
 // ── Check circle ─────────────────────────────────────────────────────────────
 function CheckCircle({ node, selected, onToggle }) {
   const isChecked = selected.has(node.id);
@@ -19,7 +36,8 @@ function CheckCircle({ node, selected, onToggle }) {
 function LeafNode({ node, selected, onToggle }) {
   return (
     <div className="fc-leaf-item">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="fc-leaf-row">
+        <div className="fc-h-line" />
         <CheckCircle node={node} selected={selected} onToggle={onToggle} />
         <button
           className={`fc-leaf-btn${node.darkText ? ' dark-text' : ''}`}
@@ -39,7 +57,8 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
 
   return (
     <div className="fc-sub-item">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="fc-sub-row">
+        <div className="fc-h-line" />
         <CheckCircle node={node} selected={selected} onToggle={onToggle} />
         <button
           className={`fc-sub-btn${node.darkText ? ' dark-text' : ''}`}
@@ -54,10 +73,13 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
       </div>
 
       {hasChildren && isOpen && (
-        <div style={{ paddingTop: 6 }}>
-          {node.children.map(leaf => (
-            <LeafNode key={leaf.id} node={leaf} selected={selected} onToggle={onToggle} />
-          ))}
+        <div className="fc-sub-content">
+          <div className="fc-connector-col" />
+          <div className="fc-sub-content-inner">
+            {node.children.map(leaf => (
+              <LeafNode key={leaf.id} node={leaf} selected={selected} onToggle={onToggle} />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -77,6 +99,11 @@ function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
     setOpenSubId(prev => prev === subId ? null : subId);
   };
 
+  useEffect(() => {
+    const t = setTimeout(fixConnectors, 30);
+    return () => clearTimeout(t);
+  }, [isOpen, openSubId]);
+
   return (
     <div style={{ marginBottom: 8 }}>
       <div className="fc-cat-row">
@@ -92,17 +119,20 @@ function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
       </div>
 
       {isOpen && (
-        <div style={{ paddingTop: 6 }}>
-          {node.children.map(sub => (
-            <SubNode
-              key={sub.id}
-              node={sub}
-              selected={selected}
-              onToggle={onToggle}
-              openSubId={openSubId}
-              onToggleSub={handleToggleSub}
-            />
-          ))}
+        <div className="fc-cat-content">
+          <div className="fc-connector-col" />
+          <div className="fc-cat-content-inner">
+            {node.children.map(sub => (
+              <SubNode
+                key={sub.id}
+                node={sub}
+                selected={selected}
+                onToggle={onToggle}
+                openSubId={openSubId}
+                onToggleSub={handleToggleSub}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -261,7 +291,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
         .fc-leaf-btn {
           flex: 1;
           border: none;
-          border-radius: 4px;
+          border-radius: 3px;
           padding: 4px 10px;
           font-family: "Exo 2", sans-serif;
           font-size: 7.5px;
@@ -269,7 +299,6 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           color: #fff;
           text-align: left;
           cursor: pointer;
-          border-radius: 3px;
         }
         .fc-leaf-btn.dark-text { color: #111; }
 
@@ -300,6 +329,49 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           display: inline-block;
         }
         .fc-arrow.open { transform: rotate(180deg); }
+
+        /* Connectors */
+        .fc-cat-content {
+          padding-top: 6px;
+          padding-left: 32px;
+          position: relative;
+          display: flex;
+        }
+        .fc-sub-content {
+          padding-top: 6px;
+          padding-left: 28px;
+          position: relative;
+          display: flex;
+        }
+        .fc-connector-col {
+          position: absolute;
+          left: 32px;
+          top: 0;
+          width: 2px;
+          background: #e8e8e8;
+          pointer-events: none;
+        }
+        .fc-sub-content > .fc-connector-col {
+          left: 28px;
+        }
+        .fc-cat-content-inner,
+        .fc-sub-content-inner {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        .fc-sub-row,
+        .fc-leaf-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .fc-h-line {
+          width: 14px;
+          height: 2px;
+          background: #e8e8e8;
+          flex-shrink: 0;
+        }
       `}</style>
     </div>
   );

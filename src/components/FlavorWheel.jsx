@@ -1,16 +1,40 @@
 import { useState, useEffect } from 'react';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
 
+function fixConnectors() {
+  document.querySelectorAll('.fw-content-inner').forEach(container => {
+    const items = Array.from(container.children).filter(el =>
+      el.classList.contains('fw-sub-item') || el.classList.contains('fw-leaf-item')
+    );
+    if (items.length === 0) return;
+    const last = items[items.length - 1];
+    const lastRow = last.querySelector('.fw-sub-row, .fw-leaf-row');
+    if (!lastRow) return;
+    const containerRect = container.getBoundingClientRect();
+    const lastRowRect = lastRow.getBoundingClientRect();
+    const height = (lastRowRect.top + lastRowRect.height / 2) - containerRect.top;
+    let vline = container.querySelector(':scope > .fw-vline');
+    if (!vline) {
+      vline = document.createElement('div');
+      vline.className = 'fw-vline';
+      container.prepend(vline);
+    }
+    vline.style.height = Math.round(height) + 'px';
+  });
+}
+
 // ── Leaf (level 3) node ──────────────────────────────────────────────────────
 function LeafNode({ node }) {
   return (
     <div className="fw-leaf-item">
-      <button
-        className={`fw-leaf-btn${node.darkText ? ' dark-text' : ''}`}
-        style={{ background: node.color }}
-      >
-        {node.label}
-      </button>
+      <div className="fw-leaf-row">
+        <button
+          className={`fw-leaf-btn${node.darkText ? ' dark-text' : ''}`}
+          style={{ background: node.color }}
+        >
+          {node.label}
+        </button>
+      </div>
     </div>
   );
 }
@@ -22,22 +46,26 @@ function SubNode({ node, openSubId, onToggleSub }) {
 
   return (
     <div className="fw-sub-item">
-      <button
-        className={`fw-sub-btn${node.darkText ? ' dark-text' : ''}`}
-        style={{ background: node.color }}
-        onClick={hasChildren ? () => onToggleSub(node.id) : undefined}
-      >
-        {node.label}
-        {hasChildren && (
-          <span className={`fw-arrow${isOpen ? ' open' : ''}`}>▼</span>
-        )}
-      </button>
+      <div className="fw-sub-row">
+        <button
+          className={`fw-sub-btn${node.darkText ? ' dark-text' : ''}`}
+          style={{ background: node.color }}
+          onClick={hasChildren ? () => onToggleSub(node.id) : undefined}
+        >
+          {node.label}
+          {hasChildren && (
+            <span className={`fw-arrow${isOpen ? ' open' : ''}`}>▼</span>
+          )}
+        </button>
+      </div>
 
       {hasChildren && isOpen && (
-        <div style={{ paddingTop: 6 }}>
-          {node.children.map(leaf => (
-            <LeafNode key={leaf.id} node={leaf} />
-          ))}
+        <div style={{ paddingTop: 6, paddingLeft: 12 }}>
+          <div className="fw-content-inner">
+            {node.children.map(leaf => (
+              <LeafNode key={leaf.id} node={leaf} />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -57,6 +85,11 @@ function CatNode({ node, openCatId, onToggleCat }) {
     setOpenSubId(prev => prev === subId ? null : subId);
   };
 
+  useEffect(() => {
+    const t = setTimeout(fixConnectors, 30);
+    return () => clearTimeout(t);
+  }, [isOpen, openSubId]);
+
   return (
     <div className="fw-cat-item" style={{ marginBottom: 8 }}>
       <button
@@ -69,15 +102,17 @@ function CatNode({ node, openCatId, onToggleCat }) {
       </button>
 
       {isOpen && (
-        <div style={{ paddingTop: 6 }}>
-          {node.children.map(sub => (
-            <SubNode
-              key={sub.id}
-              node={sub}
-              openSubId={openSubId}
-              onToggleSub={handleToggleSub}
-            />
-          ))}
+        <div style={{ paddingTop: 8, paddingLeft: 16 }}>
+          <div className="fw-content-inner">
+            {node.children.map(sub => (
+              <SubNode
+                key={sub.id}
+                node={sub}
+                openSubId={openSubId}
+                onToggleSub={handleToggleSub}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -160,7 +195,7 @@ export default function FlavorWheel({ onBack }) {
         .fw-leaf-btn {
           flex: 1;
           border: none;
-          border-radius: 4px;
+          border-radius: 3px;
           padding: 4px 10px;
           font-family: "Exo 2", sans-serif;
           font-size: 7.5px;
@@ -169,7 +204,6 @@ export default function FlavorWheel({ onBack }) {
           text-align: left;
           cursor: default;
           width: 100%;
-          border-radius: 3px;
         }
         .fw-leaf-btn.dark-text { color: #111; }
 
@@ -183,6 +217,45 @@ export default function FlavorWheel({ onBack }) {
           display: inline-block;
         }
         .fw-arrow.open { transform: rotate(180deg); }
+
+        /* Connectors */
+        .fw-content-inner { position: relative; }
+        .fw-vline {
+          position: absolute;
+          left: -14px;
+          top: 0;
+          width: 2px;
+          background: #e8e8e8;
+          pointer-events: none;
+        }
+        .fw-sub-row {
+          position: relative;
+          padding-left: 14px;
+        }
+        .fw-sub-row::before {
+          content: "";
+          position: absolute;
+          left: -14px;
+          top: 50%;
+          width: 12px;
+          height: 2px;
+          background: #e8e8e8;
+          transform: translateY(-50%);
+        }
+        .fw-leaf-row {
+          position: relative;
+          padding-left: 12px;
+        }
+        .fw-leaf-row::before {
+          content: "";
+          position: absolute;
+          left: -14px;
+          top: 50%;
+          width: 12px;
+          height: 2px;
+          background: #e8e8e8;
+          transform: translateY(-50%);
+        }
       `}</style>
     </div>
   );
