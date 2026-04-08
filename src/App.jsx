@@ -9,10 +9,11 @@ import BrewKnowledge from './components/BrewKnowledge';
 import FlavorWheel from './components/FlavorWheel';
 import FlavorChecklist from './components/FlavorChecklist';
 
+// dir: 1 = avanzar (entra desde derecha), -1 = retroceder (entra desde izquierda)
 const pageVariants = {
-  initial: { opacity: 0, x: 40 },
+  initial: (dir) => ({ opacity: 0, x: dir * 40 }),
   animate: { opacity: 1, x: 0 },
-  exit:    { opacity: 0, x: -40 },
+  exit:    (dir) => ({ opacity: 0, x: dir * -40 }),
 };
 
 const pageTransition = {
@@ -23,6 +24,7 @@ const pageTransition = {
 
 export default function App() {
   const [view, setView] = useState('list'); // list | form | ratio | timer | knowledge | flavor-wheel | flavor-checklist
+  const [direction, setDirection] = useState(1); // 1 = avanzar, -1 = retroceder
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [timerRecipe, setTimerRecipe] = useState(null);
   const [selectedBrew, setSelectedBrew] = useState(null);
@@ -38,18 +40,23 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', saved);
   }, []);
 
-  const goToForm = (recipe = null) => { setEditingRecipe(recipe); setView('form'); };
-  const goToTimer = (recipe) => { setTimerRecipe(recipe); setView('timer'); };
-  const goToList = () => setView('list');
-  const goToRatio = () => setView('ratio');
-  const goToKnowledge = () => setView('knowledge');
-  const goToFlavorWheel = () => setView('flavor-wheel');
+  // Avanzar → nueva pantalla entra desde la derecha
+  const navigateTo = (newView) => { setDirection(1);  setView(newView); };
+  // Retroceder → nueva pantalla entra desde la izquierda
+  const navigateBack = (newView) => { setDirection(-1); setView(newView); };
+
+  const goToForm      = (recipe = null) => { setEditingRecipe(recipe); navigateTo('form'); };
+  const goToTimer     = (recipe) => { setTimerRecipe(recipe); navigateTo('timer'); };
+  const goToList      = () => navigateBack('list');
+  const goToRatio     = () => navigateTo('ratio');
+  const goToKnowledge = () => navigateTo('knowledge');
+  const goToFlavorWheel = () => navigateTo('flavor-wheel');
 
   // Called by BrewDetail to open the checklist
   const openChecklist = (currentNotes, setFlavorNotes) => {
     checklistCallbackRef.current = setFlavorNotes;
     setChecklistInitial(currentNotes);
-    setView('flavor-checklist');
+    navigateTo('flavor-checklist');
   };
 
   const handleChecklistSave = (selection) => {
@@ -65,12 +72,12 @@ export default function App() {
         flavorNotes: selection,
       }
     } : prev);
-    setView('knowledge');
+    navigateBack('knowledge');
   };
 
   const handleChecklistBack = () => {
     checklistCallbackRef.current = null;
-    setView('knowledge');
+    navigateBack('knowledge');
   };
 
   const handleUpdateBrew = (id, updates) => {
@@ -79,6 +86,7 @@ export default function App() {
 
   const pageProps = {
     variants: pageVariants,
+    custom: direction,
     initial: 'initial',
     animate: 'animate',
     exit: 'exit',
@@ -87,7 +95,7 @@ export default function App() {
 
   return (
     <div className="app" style={{ overflow: 'hidden' }}>
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" custom={direction}>
         {view === 'list' && (
           <motion.div key="list" {...pageProps}>
             <RecipeList
