@@ -104,11 +104,11 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, 
   return (
     <motion.div
       className="bk-screen"
-      drag="x"
+      drag={selectedBrew ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0, right: 0.3 }}
       onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
-      style={{ touchAction: 'pan-y' }}
+      style={{ touchAction: selectedBrew ? 'auto' : 'pan-y' }}
     >
       {/* Header */}
       <div className="screen-header" style={{ marginTop: '16px' }}>
