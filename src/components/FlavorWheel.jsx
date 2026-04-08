@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
 
 function fixConnectors() {
@@ -128,7 +129,13 @@ export default function FlavorWheel({ onBack }) {
   };
 
   return (
-    <div style={{ fontFamily: '"Exo 2", sans-serif', background: '#fff', color: '#111', maxWidth: 430, margin: '0 auto', paddingBottom: 48 }}>
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.3 }}
+      onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
+      style={{ fontFamily: '"Exo 2", sans-serif', background: '#fff', color: '#111', maxWidth: 430, margin: '0 auto', paddingBottom: 48, touchAction: 'pan-y' }}
+    >
       {/* Header */}
       <div style={{ padding: '36px 24px 16px', borderBottom: '1px solid #e8e8e8', display: 'flex', alignItems: 'center', gap: 14 }}>
         <button
@@ -257,6 +264,6 @@ export default function FlavorWheel({ onBack }) {
           transform: translateY(-50%);
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }

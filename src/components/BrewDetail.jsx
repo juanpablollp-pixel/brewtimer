@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { motion, useDragControls } from 'framer-motion';
 import { calcularRecomendacionTemp } from '../utils/brewRecommendations';
 
 function formatDate(isoString) {
@@ -113,6 +114,7 @@ function RecTemp({ resultado }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
+  const dragControls = useDragControls();
   const [tueste, setTueste]           = useState(brew.sensorAnalysis?.tueste  ?? null);
   const [acidez, setAcidez]           = useState(brew.sensorAnalysis?.acidez  ?? null);
   const [amargor, setAmargor]         = useState(brew.sensorAnalysis?.amargor ?? null);
@@ -155,11 +157,35 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
     : 'bd-tiempo-bloque-valor';
 
   return (
-    <div className="bd-overlay" onClick={onClose}>
-      <div className="bd-sheet" onClick={(e) => e.stopPropagation()}>
+    <motion.div
+      className="bd-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="bd-sheet"
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.4 }}
+        onDragEnd={(_, info) => { if (info.offset.y > 80) onClose(); }}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+      >
 
         {/* Handle */}
-        <div className="bd-handle" />
+        <div
+          className="bd-handle"
+          onPointerDown={(e) => dragControls.start(e)}
+          style={{ touchAction: 'none' }}
+        />
 
         {/* Header */}
         <div className="bd-header">
@@ -284,7 +310,7 @@ export default function BrewDetail({ brew, onClose, onSave, onOpenChecklist }) {
           Guardar Análisis
         </button>
 
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { useHistory } from '../hooks/useHistory';
 import BrewDetail from './BrewDetail';
 
@@ -101,7 +102,14 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, 
   };
 
   return (
-    <div className="bk-screen">
+    <motion.div
+      className="bk-screen"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.3 }}
+      onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
+      style={{ touchAction: 'pan-y' }}
+    >
       {/* Header */}
       <div className="screen-header" style={{ marginTop: '16px' }}>
         <button className="back-btn" onClick={onBack}>
@@ -142,14 +150,17 @@ export default function BrewKnowledge({ onBack, onFlavorWheel, onOpenChecklist, 
       </div>
 
       {/* Bottom sheet modal */}
-      {selectedBrew && (
-        <BrewDetail
-          brew={selectedBrew}
-          onClose={() => onSelectBrew(null)}
-          onSave={handleSave}
-          onOpenChecklist={onOpenChecklist}
-        />
-      )}
-    </div>
+      <AnimatePresence>
+        {selectedBrew && (
+          <BrewDetail
+            key="brew-detail"
+            brew={selectedBrew}
+            onClose={() => onSelectBrew(null)}
+            onSave={handleSave}
+            onOpenChecklist={onOpenChecklist}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

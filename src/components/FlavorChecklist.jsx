@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FLAVOR_WHEEL } from '../data/flavorWheel';
 
 function fixConnectors() {
@@ -183,7 +184,13 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
   const chips = order.filter(id => selected.has(id)).map(id => selected.get(id));
 
   return (
-    <div style={{ fontFamily: '"Exo 2", sans-serif', background: '#fff', color: '#111', maxWidth: 430, margin: '0 auto', paddingBottom: 48 }}>
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.3 }}
+      onDragEnd={(_, info) => { if (info.offset.x > 60) onBack(); }}
+      style={{ fontFamily: '"Exo 2", sans-serif', background: '#fff', color: '#111', maxWidth: 430, margin: '0 auto', paddingBottom: 48, touchAction: 'pan-y' }}
+    >
       {/* Sticky header */}
       <div style={{ position: 'sticky', top: 0, zIndex: 50, background: '#fff', borderBottom: '1px solid #e8e8e8', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -214,20 +221,26 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           {chips.length === 0 ? (
             <span style={{ fontSize: 11, fontWeight: 300, color: '#bbb', fontStyle: 'italic' }}>Ningún sabor seleccionado</span>
           ) : (
-            chips.map(item => (
-              <span
-                key={item.id}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px 4px 8px', borderRadius: 20, fontSize: 10, fontWeight: 600, background: item.color, color: item.darkText ? '#111' : '#fff' }}
-              >
-                {item.label}{' '}
-                <span
-                  style={{ fontSize: 10, opacity: 0.8, cursor: 'pointer' }}
-                  onClick={() => handleRemoveChip(item.id)}
+            <AnimatePresence>
+              {chips.map(item => (
+                <motion.span
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px 4px 8px', borderRadius: 20, fontSize: 10, fontWeight: 600, background: item.color, color: item.darkText ? '#111' : '#fff' }}
                 >
-                  ✕
-                </span>
-              </span>
-            ))
+                  {item.label}{' '}
+                  <span
+                    style={{ fontSize: 10, opacity: 0.8, cursor: 'pointer' }}
+                    onClick={() => handleRemoveChip(item.id)}
+                  >
+                    ✕
+                  </span>
+                </motion.span>
+              ))}
+            </AnimatePresence>
           )}
         </div>
       </div>
@@ -373,6 +386,6 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           flex-shrink: 0;
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
