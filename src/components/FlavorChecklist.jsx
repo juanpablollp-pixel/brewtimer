@@ -68,6 +68,7 @@ function LeafNode({ node, selected, onToggle, activeTooltipId, onShowTooltip }) 
         {node.description && (
           <button
             className={`fc-info-btn${activeTooltipId === node.id ? ' active' : ''}`}
+            style={{ background: node.color, color: node.darkText ? '#111' : '#fff' }}
             onClick={(e) => { e.stopPropagation(); onShowTooltip(e, node); }}
           >
             +
@@ -101,6 +102,7 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub, activeToolt
         {node.description && (
           <button
             className={`fc-info-btn${activeTooltipId === node.id ? ' active' : ''}`}
+            style={{ background: node.color, color: node.darkText ? '#111' : '#fff' }}
             onClick={(e) => { e.stopPropagation(); onShowTooltip(e, node); }}
           >
             +
@@ -334,7 +336,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
             background: '#ffffff',
             border: '1px solid #e8e8e8',
             borderRadius: 4,
-            padding: '12px 28px 12px 12px',
+            padding: '12px 44px 12px 12px',
             zIndex: 200,
             fontFamily: '"Exo 2", sans-serif',
             fontSize: 11,
@@ -348,15 +350,20 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
             onClick={() => setTooltip(null)}
             style={{
               position: 'absolute',
-              top: 6,
-              right: 8,
+              top: 0,
+              right: 0,
               background: 'none',
               border: 'none',
               fontSize: 16,
               cursor: 'pointer',
               color: '#111',
               lineHeight: 1,
-              padding: 2,
+              width: 44,
+              height: 44,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
             }}
           >
             ×
@@ -426,12 +433,10 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
 
         .fc-info-btn {
           flex-shrink: 0;
-          width: 22px;
-          height: 22px;
-          border: 1px solid #e8e8e8;
-          border-radius: 50%;
-          background: #fff;
-          color: #888;
+          align-self: stretch;
+          aspect-ratio: 1 / 1;
+          border: none;
+          border-radius: 4px;
           font-size: 14px;
           font-weight: 700;
           line-height: 1;
@@ -442,9 +447,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           padding: 0;
         }
         .fc-info-btn.active {
-          background: #f0f0f0;
-          color: #111;
-          border-color: #ccc;
+          opacity: 0.75;
         }
 
         .fc-check {
