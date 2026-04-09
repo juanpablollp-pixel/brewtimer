@@ -19,6 +19,25 @@ function fixConnectors() {
   });
 }
 
+function DescriptionText({ text }) {
+  const sections = ['Nariz:', 'Entrada:', 'Medio:', 'Final:', 'Diagnóstico:'];
+  const parts = text.split(/(?=Nariz:|Entrada:|Medio:|Final:|Diagnóstico:)/);
+  return (
+    <div>
+      {parts.map((part, i) => {
+        const label = sections.find(s => part.startsWith(s));
+        if (!label) return <span key={i}>{part}</span>;
+        const content = part.slice(label.length).trim();
+        return (
+          <div key={i} style={{ marginBottom: i < parts.length - 1 ? 5 : 0 }}>
+            <span style={{ fontWeight: 600 }}>{label}</span>{' '}{content}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Check circle ─────────────────────────────────────────────────────────────
 function CheckCircle({ node, selected, onToggle }) {
   const isChecked = selected.has(node.id);
@@ -34,7 +53,7 @@ function CheckCircle({ node, selected, onToggle }) {
 }
 
 // ── Leaf (level 3) ───────────────────────────────────────────────────────────
-function LeafNode({ node, selected, onToggle }) {
+function LeafNode({ node, selected, onToggle, activeTooltipId, onShowTooltip }) {
   return (
     <div className="fc-leaf-item">
       <div className="fc-leaf-row">
@@ -46,13 +65,21 @@ function LeafNode({ node, selected, onToggle }) {
         >
           {node.label}
         </button>
+        {node.description && (
+          <button
+            className={`fc-info-btn${activeTooltipId === node.id ? ' active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onShowTooltip(e, node); }}
+          >
+            +
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 // ── Sub (level 2) ────────────────────────────────────────────────────────────
-function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
+function SubNode({ node, selected, onToggle, openSubId, onToggleSub, activeTooltipId, onShowTooltip }) {
   const hasChildren = node.children && node.children.length > 0;
   const isOpen = openSubId === node.id;
 
@@ -71,6 +98,14 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
             <span className={`fc-arrow${isOpen ? ' open' : ''}`}>▼</span>
           )}
         </button>
+        {node.description && (
+          <button
+            className={`fc-info-btn${activeTooltipId === node.id ? ' active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onShowTooltip(e, node); }}
+          >
+            +
+          </button>
+        )}
       </div>
 
       {hasChildren && isOpen && (
@@ -78,7 +113,14 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
           <div className="fc-connector-col" />
           <div className="fc-sub-content-inner">
             {node.children.map(leaf => (
-              <LeafNode key={leaf.id} node={leaf} selected={selected} onToggle={onToggle} />
+              <LeafNode
+                key={leaf.id}
+                node={leaf}
+                selected={selected}
+                onToggle={onToggle}
+                activeTooltipId={activeTooltipId}
+                onShowTooltip={onShowTooltip}
+              />
             ))}
           </div>
         </div>
@@ -88,7 +130,7 @@ function SubNode({ node, selected, onToggle, openSubId, onToggleSub }) {
 }
 
 // ── Cat (level 1) ────────────────────────────────────────────────────────────
-function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
+function CatNode({ node, selected, onToggle, openCatId, onToggleCat, activeTooltipId, onShowTooltip }) {
   const isOpen = openCatId === node.id;
   const [openSubId, setOpenSubId] = useState(null);
 
@@ -131,6 +173,8 @@ function CatNode({ node, selected, onToggle, openCatId, onToggleCat }) {
                 onToggle={onToggle}
                 openSubId={openSubId}
                 onToggleSub={handleToggleSub}
+                activeTooltipId={activeTooltipId}
+                onShowTooltip={onShowTooltip}
               />
             ))}
           </div>
@@ -152,6 +196,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
   const [order, setOrder] = useState(() => initialSelection.map(i => i.id));
 
   const [openCatId, setOpenCatId] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
 
   const handleToggle = (node) => {
     setSelected(prev => {
@@ -174,6 +219,21 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
 
   const handleToggleCat = (catId) => {
     setOpenCatId(prev => prev === catId ? null : catId);
+  };
+
+  const handleShowTooltip = (e, node) => {
+    if (tooltip && tooltip.id === node.id) {
+      setTooltip(null);
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isBottomHalf = rect.bottom > window.innerHeight * 0.6;
+    setTooltip({
+      id: node.id,
+      description: node.description,
+      top: isBottomHalf ? undefined : rect.bottom + 6,
+      bottom: isBottomHalf ? window.innerHeight - rect.top + 6 : undefined,
+    });
   };
 
   const handleSave = () => {
@@ -255,9 +315,55 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
             onToggle={handleToggle}
             openCatId={openCatId}
             onToggleCat={handleToggleCat}
+            activeTooltipId={tooltip?.id}
+            onShowTooltip={handleShowTooltip}
           />
         ))}
       </div>
+
+      {/* Tooltip overlay */}
+      {tooltip && (
+        <div
+          style={{
+            position: 'fixed',
+            top: tooltip.top !== undefined ? tooltip.top : 'auto',
+            bottom: tooltip.bottom !== undefined ? tooltip.bottom : 'auto',
+            left: 24,
+            right: 24,
+            maxWidth: 'calc(100vw - 48px)',
+            background: '#ffffff',
+            border: '1px solid #e8e8e8',
+            borderRadius: 4,
+            padding: '12px 28px 12px 12px',
+            zIndex: 200,
+            fontFamily: '"Exo 2", sans-serif',
+            fontSize: 11,
+            fontWeight: 400,
+            color: '#111',
+            lineHeight: 1.6,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          }}
+        >
+          <button
+            onClick={() => setTooltip(null)}
+            style={{
+              position: 'absolute',
+              top: 6,
+              right: 8,
+              background: 'none',
+              border: 'none',
+              fontSize: 16,
+              cursor: 'pointer',
+              color: '#111',
+              lineHeight: 1,
+              padding: 2,
+            }}
+          >
+            ×
+          </button>
+          <DescriptionText text={tooltip.description} />
+        </div>
+      )}
 
       <style>{`
         .fc-cat-row {
@@ -285,6 +391,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
 
         .fc-sub-btn {
           flex: 1;
+          min-width: 0;
           border: none;
           border-radius: 4px;
           padding: 10px 14px;
@@ -303,6 +410,7 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
 
         .fc-leaf-btn {
           flex: 1;
+          min-width: 0;
           border: none;
           border-radius: 3px;
           padding: 10px 14px;
@@ -315,6 +423,29 @@ export default function FlavorChecklist({ initialSelection = [], onSave, onBack 
           cursor: pointer;
         }
         .fc-leaf-btn.dark-text { color: #111; }
+
+        .fc-info-btn {
+          flex-shrink: 0;
+          width: 22px;
+          height: 22px;
+          border: 1px solid #e8e8e8;
+          border-radius: 50%;
+          background: #fff;
+          color: #888;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+        }
+        .fc-info-btn.active {
+          background: #f0f0f0;
+          color: #111;
+          border-color: #ccc;
+        }
 
         .fc-check {
           width: 22px;
