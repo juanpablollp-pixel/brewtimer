@@ -171,7 +171,7 @@ export default function BrewDetail({ brew, onBack, onSave, onOpenChecklist }) {
       style={{ touchAction: 'pan-y' }}
     >
       {/* Header */}
-      <div className="screen-header" style={{ marginTop: '16px' }}>
+      <div className="screen-header" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}>
         <button className="back-btn" onClick={onBack}>
           <BackArrow /> Volver
         </button>
