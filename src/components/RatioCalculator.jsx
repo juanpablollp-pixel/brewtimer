@@ -8,7 +8,7 @@ const BackArrow = () => (
 
 function trackBg(value, min, max, color) {
   const pct = ((value - min) / (max - min)) * 100;
-  return `linear-gradient(to right, ${color} ${pct}%, #e8e8e8 ${pct}%)`;
+  return `linear-gradient(to right, ${color} ${pct}%, #262626 ${pct}%)`;
 }
 
 export default function RatioCalculator({ onBack }) {
@@ -75,14 +75,14 @@ export default function RatioCalculator({ onBack }) {
           step="0.1"
           value={ratio}
           onChange={(e) => handleRatio(e.target.value)}
-          style={{ '--thumb-color': '#111', background: trackBg(ratio, 10, 20, '#111') }}
+          style={{ '--thumb-color': '#eeeeee', background: trackBg(ratio, 10, 20, '#eeeeee') }}
         />
       </div>
 
       {/* Slider: Café */}
       <div className="slider-section">
         <div className="slider-top">
-          <span className="slider-name" style={{ color: '#c47a3a' }}>Café</span>
+          <span className="slider-name" style={{ color: '#d4884a' }}>Café</span>
           <span className="slider-value">{coffee}g</span>
         </div>
         <input
@@ -93,14 +93,14 @@ export default function RatioCalculator({ onBack }) {
           step="1"
           value={coffee}
           onChange={(e) => handleCoffee(e.target.value)}
-          style={{ '--thumb-color': '#c47a3a', background: trackBg(coffee, 5, 50, '#c47a3a') }}
+          style={{ '--thumb-color': '#d4884a', background: trackBg(coffee, 5, 50, '#d4884a') }}
         />
       </div>
 
       {/* Slider: Agua */}
       <div className="slider-section">
         <div className="slider-top">
-          <span className="slider-name" style={{ color: '#5a9fc2' }}>Agua</span>
+          <span className="slider-name" style={{ color: '#6aafd4' }}>Agua</span>
           <span className="slider-value">{water}ml</span>
         </div>
         <input
@@ -111,7 +111,7 @@ export default function RatioCalculator({ onBack }) {
           step="5"
           value={water}
           onChange={(e) => handleWater(e.target.value)}
-          style={{ '--thumb-color': '#5a9fc2', background: trackBg(water, 50, 1000, '#5a9fc2') }}
+          style={{ '--thumb-color': '#6aafd4', background: trackBg(water, 50, 1000, '#6aafd4') }}
         />
       </div>
     </div>

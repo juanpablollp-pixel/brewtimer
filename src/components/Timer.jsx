@@ -86,7 +86,7 @@ export default function Timer({ recipe, onExit }) {
       <div className="timer-ring-container">
         <svg viewBox="0 0 280 260" className="timer-ring">
           {/* Track */}
-          <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="#f0f0f0" strokeWidth="1" />
+          <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="#222222" strokeWidth="1" />
 
           {/* Progress arc */}
           {(isActive || isFinished || isOvertime) && (
@@ -105,7 +105,7 @@ export default function Timer({ recipe, onExit }) {
           {/* Countdown */}
           {isCountdown && (
             <text x={CX} y={CY + 18} textAnchor="middle"
-              fontSize="72" fontWeight="700" fill="#111"
+              fontSize="72" fontWeight="700" fill="#eeeeee"
               fontFamily="'Exo 2', sans-serif">
               {countdown}
             </text>
@@ -159,7 +159,7 @@ export default function Timer({ recipe, onExit }) {
                   fontWeight="600" fontFamily="'Exo 2', sans-serif" letterSpacing="3">
                   OBJETIVO BÁSCULA
                 </text>
-                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="46" fill="#111111"
+                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="46" fill="#eeeeee"
                   fontWeight="700" fontFamily="'Exo 2', sans-serif">
                   {activeStepData.accumulatedWater}g
                 </text>
@@ -170,7 +170,7 @@ export default function Timer({ recipe, onExit }) {
               </>
             ) : (
               <>
-                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="46" fill="#111111"
+                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="46" fill="#eeeeee"
                   fontWeight="300" fontFamily="'Exo 2', sans-serif">
                   {fmtTime(remaining)}
                 </text>
